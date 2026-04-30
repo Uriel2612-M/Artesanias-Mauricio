@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <strong>${v.id_venta}</strong><br>
                             <small style="color: #888; font-size: 0.8em;">${fechaFormateada}</small>
                         </td>
-                        <td>${nom}</td>              
+                        <td data-label="Cliente">${nom}</td>              
                         <td>${ape}</td>               
                         <td>${tel}</td>               
                         <td>${nombresArt}</td>        
