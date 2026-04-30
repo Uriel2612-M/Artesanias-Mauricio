@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artesanias Mauricio - login</title>
+    <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+    <main class="login-container">
+        <h1>Artesanías Mauricio</h1>
+        <form id="login-form">
+            <div class="input-group">
+                <label for="login-usuario">Nombre de usuario:</label>
+                <input type="text" id="login-usuario" required>
+            </div>
+
+            <div class="input-group">
+                <label for="login-password">Contraseña:</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <button id="btn-login"> Iniciar Sesión </button>
+        </form>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/conexion.js"></script>
+    <script src="js/outh.js"></script>
+</body>
+</html>

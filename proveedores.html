@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>proveedores</title>
+    <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+    <nav>
+        <h2>Menú Principal</h2>
+        <ul>
+            <li><a href="dashboard.html">Inicio</a></li>
+            <li><a href="ventas.html">Ventas</a></li>
+            <li><a href="clientes.html">Clientes</a></li>
+            <li>
+                Inventario
+                <ul>
+                    <li><a href="inventario_producto.html">- Producto</a></li>
+                    <li><a href="inventario_material.html">- Material</a></li>
+                </ul>
+            </li>
+
+            <li class="solo-admin">
+                <li><a href="proveedores.html">Proveedores</a></li>
+                <li><a href="compras.html">Compras</a></li>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <header>
+            <h1>Artesanías Mauricio</h1>
+            <p>USUARIO: ADMINISTRADOR | FECHA: 10/02/26 | HORA: 12:50 PM</p>
+            <button id="btn-menu-movil" class="btn-menu">☰</button>
+           
+        </header>
+        <h2>Directorio de Porveedores</h2>
+        <section class="barra-busqueda">
+            <form class="barra-busqueda">
+            <input type="text" placeholder="Buscar cliente...">
+            <button type="submit" class="btn-secundario">Buscar</button>
+            </form>
+        </section>
+
+        <section>
+            <table border="1">
+    <thead>
+        <tr>
+            <th>Nombre / Empresa</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Maderas Uriel</td>
+            <td>8123456789</td>
+            <td>uriel@maderas.com</td>
+            <td><button class="btn-editar">Editar</button></td>
+        </tr>
+    </tbody>
+</table>
+        </section>
+    </main>
+    <script src="js/ui.js"></script>
+</body>
+
+</html>

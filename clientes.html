@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes</title>
+    <link rel="stylesheet" href="css/global.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/conexion.js"></script>
+    <script src='js/clientes.js'></script>
+    <script src="js/ui.js"></script>
+    
+</head>
+<body>
+    <nav>
+        <h2>Menú Principal</h2>
+        <ul>
+            <li><a href="dashboard.html">Inicio</a></li>
+            <li><a href="ventas.html">Ventas</a></li>
+            <li><a href="clientes.html">Clientes</a></li>
+            <li>
+                Inventario
+                <ul>
+                    <li><a href="inventario_producto.html">- Producto</a></li>
+                    <li><a href="inventario_material.html">- Material</a></li>
+                </ul>
+            </li>
+                <li class="solo-admin">
+                    <ul>
+                    <li><a href="proveedores.html">Proveedores</a></li>
+                    <li><a href="compras.html">Compras</a></li>
+                    </ul>
+                </li>
+        </ul>
+    </nav>
+
+    <main>
+        <header>
+            <h1>Artesanías Mauricio</h1>
+            <p>USUARIO: ADMINISTRADOR | FECHA: 10/02/26 | HORA: 12:50 PM</p>
+            <button id="btn-menu-movil" class="btn-menu">☰</button>
+           
+        </header>
+        <h2>Directorio de Clientes</h2>
+        <section class="barra-busqueda">
+            <form class="barra-busqueda">
+            <input type="text" placeholder="Buscar cliente...">
+            <button type="submit" class="btn-secundario">Buscar</button>
+            </form>
+        </section>
+
+        <section>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre cliente</th>
+                        <th>Apellido</th>
+                        <th>Teléfono</th>                
+                        <th>Acciones</th>
+                    </tr>
+                </thead>                
+                <tbody id="tabla-clientes-body">                   
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <dialog id="modal-cliente">
+        <form id="form-cliente">
+            <div class="input-group">
+                <label for="cliente-nombre">Nombre:</label>
+                <input type="text" id="cliente-nombre" required>
+            </div>
+            </form>
+    </dialog>
+
+</body>
+</html>

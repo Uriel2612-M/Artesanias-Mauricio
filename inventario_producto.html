@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>inventario_producto</title>
+    <link rel="stylesheet" href="css/global.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/conexion.js"></script>
+    <script src='js/datos.js'></script>
+    <script src="js/ui.js"></script>
+</head>
+<body>
+    <nav>
+        <h2>Menú Principal</h2>
+        <ul>
+            <li><a href="dashboard.html">Inicio</a></li>
+            <li><a href="ventas.html">Ventas</a></li>
+            <li><a href="clientes.html">Clientes</a></li>
+            <li>
+                Inventario
+                <ul>
+                    <li><a href="inventario_producto.html">- Producto</a></li>
+                    <li><a href="inventario_material.html">- Material</a></li>
+                </ul>
+            </li>
+            <li class="solo-admin">
+                    <ul>
+                    <li><a href="proveedores.html">Proveedores</a></li>
+                    <li><a href="compras.html">Compras</a></li>
+                    </ul>
+                </li>
+        </ul>
+    </nav>
+
+    <main>
+        <header>
+            <h1>Artesanías Mauricio</h1>
+            <p>USUARIO: ADMINISTRADOR | FECHA: 10/02/26 | HORA: 12:50 PM</p>
+            <button id="btn-menu-movil" class="btn-menu">☰</button>
+            
+        
+        </header>
+
+        <section>
+            <h2>Inventario - Artesanías</h2>
+            
+            <section class="controles-superiores">
+                <button id="btn-nueva-artesania" class="btn-principal">Registrar nueva artesanía</button>
+                <dialog id="modal-nueva-artesania">
+                <h2>Agregar nueva artesanía</h2>
+                <form id="form-nueva-artesania">
+                <div class="input-group">
+                    <label for="artesania-nombre">Nombre:</label>
+                    <input type="text" id="artesania-nombre" placeholder="Ej. Elefantes" required>
+                </div>
+            
+                <div class="input-group">
+                    <label for="artesania-unidad">Unidad:</label>
+                    <input type="text" id="artesania-unidad" placeholder="piezas" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="artesania-precio">Precio:</label>
+                    <input type="number" id="artesania-precio" placeholder="900" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="artesania-cantidad">Cantidad (Stock):</label>
+                    <input type="number" id="artesania-cantidad" value="1" required>
+                </div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 2px solid var(--color-primario);">
+
+                <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px;">
+                    <div class="input-group" style="flex: 2; margin-bottom: 0;">
+                        <label for="material-select">Material:</label>
+                        <input type="text" id="material-select" placeholder="Ej. vidrio">
+                    </div>
+                    <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="material-cantidad">Cantidad:</label>
+                        <input type="number" id="material-cantidad" placeholder="3">
+                    </div>
+                    <button type="button" class="btn-secundario" style="font-size: 1.2rem; padding: 10px 15px;">+</button>
+                </div>
+            <table style="margin-top: 10px; box-shadow: none; border: 1px solid var(--borde);">
+                <thead>
+                    <tr>
+                        <th style="font-size: 0.8rem; padding: 10px;">Nombre de material</th>
+                        <th style="font-size: 0.8rem; padding: 10px;">Cantidad</th>
+                        <th style="font-size: 0.8rem; padding: 10px;">Remover</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px;">madera</td>
+                        <td style="padding: 10px;">3</td>
+                        <td style="padding: 10px;">
+                            <button type="button" style="background: red; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Quitar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="modal-acciones">
+                <button type="button" id="btn-cancelar-artesania">Cancelar</button>
+                <button type="submit">Aceptar</button>
+            </div>
+        </form>
+        </dialog>
+            </section>
+
+            <section class="barra-busqueda">
+                <form class="barra-busqueda">
+                <input type="text" placeholder="Buscar por nombre...">
+                <button type="submit" class="btn-secundario">Buscar</button>
+                </form>
+            </section>
+
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Producto</th>
+                        <th>Nombre producto</th>
+                        <th>Unidad</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Jarrones</td>
+                        <td>Jarrones vidrio</td>
+                        <td>pieza</td>
+                        <td>$90</td>
+                        <td>1</td>
+                        <td><button class="btn-editar">Editar</button></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Recibidor</td>
+                        <td>Recibidor madera</td>
+                        <td>unitario</td>
+                        <td>$1000</td>
+                        <td>2</td>
+                        <td><button class="btn-editar">Editar</button></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Lámpara</td>
+                        <td>Lámpara forja</td>
+                        <td>unitario</td>
+                        <td>$300</td>
+                        <td>1</td>
+                        <td><button class="btn-editar">Editar</button></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Mesa</td>
+                        <td>Mesa centro</td>
+                        <td>unitario</td>
+                        <td>$800</td>
+                        <td>4</td>
+                        <td><button class="btn-editar">Editar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+        </section>
+
+    </main>
+    <script src="js/ui.js"></script>
+</body>
+</html>

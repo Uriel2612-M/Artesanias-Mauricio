@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dashboard</title>
+    <link rel="stylesheet" href="css/global.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/conexion.js"></script>
+    <script src='js/datos.js'></script>
+    <script src="js/ui.js"></script>
+    
+</head>
+<body>
+    <nav>
+        <h2>Menú Principal</h2>
+        <ul>
+            <li><a href="dashboard.html">Inicio</a></li>
+            <li><a href="ventas.html">Ventas</a></li>
+            <li><a href="clientes.html">Clientes</li>
+            <li>
+                Inventario
+                <ul>
+                    <li><a href="inventario_producto.html">- Producto</a></li>
+                    <li><a href="inventario_material.html">- Material</a></li>
+                </ul>
+
+            </li>
+             <li class="solo-admin">
+                    <ul>
+                    <li><a href="proveedores.html">Proveedores</a></li>
+                    <li><a href="compras.html">Compras</a></li>
+                    </ul>
+                </li>
+        </ul>
+    </nav>
+    <main>
+        <header>
+           <header>
+                <h1>Artesanías Mauricio</h1>
+                <p>USUARIO: <span id="header-usuario">CARGANDO...</span> | FECHA: <span id="header-fecha">--/--/--</span> | HORA: <span id="header-hora">--:--</span></p>
+                <button id="btn-menu-movil" class="btn-menu">☰</button>
+            </header>
+            
+        </header>
+
+        <section class="resumen-dashboard">
+            <h2 class="titulo-dashboard">Resumen General</h2>
+            
+            <div class="tarjetas-container">
+                <div class="tarjeta">
+                    <p>Ventas del día:</p>
+                    <h2 id="dash-ventas">0</h2>
+                </div>
+
+                <div class="tarjeta">
+                    <p>Artesanías en stock:</p>
+                     <h2 id="dash-stock">0</h2>
+             </div>
+
+                <div class="tarjeta">
+                    <p>Recursos bajos en:</p>
+                    <p>Artesanías: <b id="dash-baja-art">Cargando...</b></p>
+                    <p>Material: <b id="dash-baja-mat">Cargando...</b></p>
+                </div>
+
+            <div class="acciones-dashboard">
+                <button class="btn-principal" onclick="window.location.href='ventas.html'">Registrar nueva venta</button>
+                <button class="btn-principal" onclick="window.location.href='inventario_producto.html'">Añadir producto / material</button>
+            </div>
+        </section>
+    </main>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

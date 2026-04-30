@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas</title>
+    <link rel="stylesheet" href="css/global.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/conexion.js"></script>
+    <script src="js/ui.js"></script>
+    
+    <script src="js/venta.js"></script>
+</head>
+<body>
+    <nav>
+        <h2>Menú Principal</h2>
+        <ul>
+            <li><a href="dashboard.html">Inicio</a></li>
+            <li><a href="ventas.html">Ventas</a></li>
+            <li><a href="clientes.html">Clientes</a></li>
+            <li>
+                Inventario
+                <ul>
+                    <li><a href="inventario_producto.html">- Producto</a></li>
+                    <li><a href="inventario_material.html">- Material</a></li>
+                </ul>
+            </li>
+            <li class="solo-admin">
+                    <ul>
+                        <li><a href="proveedores.html">Proveedores</a></li>
+                        <li><a href="compras.html">Compras</a></li>
+                    </ul>
+                </li>
+        </ul>
+    </nav>
+
+    <main>
+    <header>
+        <h1>Artesanías Mauricio</h1>
+        <p>USUARIO: <span id="header-usuario">CARGANDO...</span> | FECHA: <span id="header-fecha">--/--/--</span> | HORA: <span id="header-hora">--:--</span></p>
+        <button id="btn-menu-movil" class="btn-menu">☰</button>
+    </header>
+
+    <h2>Historial de ventas</h2>
+    
+    <section class="controles-superiores">
+        <button id="btn-nueva-venta" class="btn-principal">Registrar nueva venta</button>
+        <section class="barra-busqueda">
+            <form class="barra-busqueda">
+            <input type="text" placeholder="Buscar cliente...">
+            <button type="submit" class="btn-secundario">Buscar</button>
+            </form>
+        </section>
+        
+        <dialog id="modal-venta">
+            <form id="form-venta">
+                <h2>Registrar nueva venta</h2>
+                
+                <div class="input-group">
+                    <label>Nombre:</label> <input type="text" id="v-nombre">
+                </div>
+                <div class="input-group">
+                    <label>Apellidos:</label> <input type="text" id="v-apellidos">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono:</label> <input type="text" id="v-telefono">
+                </div>
+                <div class="input-group">
+                    <label>Fecha de entrega:</label> <input type="date" id="v-fecha-entrega">
+                </div>
+
+                <div class="input-group">
+                    <label>Artesanía:</label> <input type="text" id="v-artesania-nombre">
+                </div>
+                <div class="input-group">
+                    <label>Cantidad:</label> 
+                    <input type="number" id="v-cantidad" value="1">
+                    <button type="button" id="btn-agregar-item">+</button>
+                </div>
+
+                <div class="input-group">
+                    <label>Precio Unitario ($):</label> 
+                    <input type="number" id="v-precio-unitario" placeholder="Ej: 250">
+                </div>
+
+                <table border="1" style="width: 100%; margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Nombre artesanía</th>
+                            <th>Cant.</th>
+                            <th>Precio</th>
+                            <th>Quitar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-carrito"></tbody>
+                </table>
+
+                <div class="input-group">
+                    <label>Total de la Venta ($):</label>
+                    <input type="number" id="v-total-calculado" readonly style="background: #ccc;">
+                </div>
+
+                <div class="input-group">
+                    <label>Monto Recibido (Abono $):</label>
+                    <input type="number" id="v-abono" placeholder="¿Cuánto pagó hoy?">
+                </div>
+
+                <div class="input-group">
+                    <label>Saldo Pendiente ($):</label>
+                    <input type="number" id="v-saldo-restante" readonly style="color: red; font-weight: bold;">
+                </div>
+
+                <div class="modal-acciones">
+                    <button type="button" id="btn-cancelar-venta">Cancelar</button>
+                    <button type="submit" id="btn-finalizar">Registrar nueva compra</button>
+                </div>
+            </form>
+            <div class="input-group">
+                <label for="v-estado-pago">Estado de Pago:</label>
+                <select id="v-estado-pago">
+                <option value="Pagado">Pagado</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Anticipo">Anticipo</option>
+    </select>
+</div>
+        </dialog>
+    </section>
+
+    <section>
+        <table border="1" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre cliente</th>
+                    <th>Apellidos</th>
+                    <th>Teléfono</th>
+                    <th>Artesanía Comprada</th>
+                    <th>Total de compra</th>
+                    <th>Abonado</th>
+                    <th>Saldo</th>
+                    <th>Estado Pagado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpo-ventas"></tbody>
+        </table>
+    </section>
+</main>
+   <dialog id="modal-editar-venta">
+    <form id="form-editar-venta">
+        <h2>Actualizar Pago y Cliente</h2>
+        <input type="hidden" id="edit-id-venta">
+        <input type="hidden" id="edit-id-cliente">
+
+        <input type="text" id="edit-nombre" placeholder="Nombre">
+        <input type="text" id="edit-apellidos" placeholder="Apellidos">
+        <input type="text" id="edit-telefono" placeholder="Teléfono">
+
+        <label>Total de la Venta ($):</label>
+        <input type="number" id="edit-total-venta" readonly style="background:#eee">
+
+        <label>Monto Pagado ($):</label>
+        <input type="number" id="edit-monto-pagado" step="0.01">
+
+        <label>Estado:</label>
+        <select id="edit-estado-pago">
+            <option value="Pagado">Pagado</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Anticipo">Anticipo</option>
+        </select>
+
+        <div class="modal-acciones">
+            <button type="submit">Guardar Cambios</button>
+            <button type="button" id="btn-cerrar-edit">Cancelar</button>
+        </div>
+    </form>
+</dialog>
+    
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>inventario_material</title>
+    <link rel="stylesheet" href="css/global.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/conexion.js"></script>
+    <script src='js/datos.js'></script>
+    <script src="js/ui.js"></script>
+    
+</head>
+<body>
+    <nav>
+        <h2>Menú Principal</h2>
+        <ul>
+            <li><a href="dashboard.html">Inicio</a></li>
+            <li><a href="ventas.html">Ventas</a></li>
+            <li><a href="clientes.html">Clientes</a></li>
+            <li>
+                Inventario
+                <ul>
+                    <li><a href="inventario_producto.html">- Producto</a></li>
+                    <li><a href="inventario_material.html">- Material</a></li>
+                </ul>
+            </li>
+             <li class="solo-admin">
+                    <ul>
+                    <li><a href="proveedores.html">Proveedores</a></li>
+                    <li><a href="compras.html">Compras</a></li>
+                    </ul>
+                </li>
+        </ul>
+    </nav>
+
+    <main>
+        <header>
+            <h1>Artesanías Mauricio</h1>
+            <p>USUARIO: ADMINISTRADOR | FECHA: 10/02/26 | HORA: 12:50 PM</p>
+            <button id="btn-menu-movil" class="btn-menu">☰</button>
+            
+          
+        </header>
+
+        <section>
+            <h2>Inventario - Material</h2>
+            
+                <section class="controles-superiores">
+                <button id="btn-nuevo-material" class="btn-principal">Registrar nuevo material</button>
+                <dialog id="modal-nuevo-material">
+                <h2>Agregar nuevo material</h2>
+                <form id="form-nuevo-material">
+                <div class="input-group">
+                    <label for="material-nombre">Nombre:</label>
+                    <input type="text" id="material-nombre" placeholder="Ej. Lamina" required>
+                </div>
+            
+                <div class="input-group">
+                    <label for="material-unidad">Unidad:</label>
+                    <input type="text" id="material-unidad" placeholder="piezas" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="material-cantidad">Cantidad (Stock):</label>
+                    <input type="number" id="material-cantidad" placeholder="1" required>
+                </div>
+
+            <div class="modal-acciones">
+                <button type="button" id="btn-cancelar-material">Cancelar</button>
+                <button type="submit">Aceptar</button>
+            </div>
+        </form>
+        </dialog>
+            </section>
+
+            <section class="barra-busqueda">
+                <form class="barra-busqueda">
+                <input type="text" placeholder="Buscar por nombre...">
+                <button type="submit" class="btn-secundario">Buscar</button>
+                </form>
+            </section>
+
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Material</th>
+                        <th>Nombre Material</th>
+                        <th>Unidad</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Madera</td>
+                        <td>Triplay</td>
+                        <td>20</td>
+                        <td>100</td>
+                        <td><button class="btn-editar">Editar</button></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Vidrio</td>
+                        <td>M^2</td> <td>100</td>
+                        <td>100</td>
+                        <td><button class="btn-editar">Editar</button></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Lamina</td>
+                        <td>M^2</td> <td>30</td>
+                        <td>30</td>
+                        <td><button class="btn-editar">Editar</button></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Tubos</td>
+                        <td>3 m</td> <td>3</td>
+                        <td>3</td>
+                        <td><button class="btn-editar">Editar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+
+</body>
+</html>

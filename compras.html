@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compras</title>
+    <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+    <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compras - Artesanías Mauricio</title>
+    <link rel="stylesheet" href="css/global.css">
+</head>
+<body>
+    <nav>
+        <h2>Menú Principal</h2>
+        <ul>
+            <li><a href="dashboard.html">Inicio</a></li>
+            <li><a href="ventas.html">Ventas</a></li>
+            <li><a href="clientes.html">Clientes</a></li>
+            <li>
+                Inventario
+                <ul>
+                    <li><a href="inventario_producto.html">- Producto</a></li>
+                    <li><a href="inventario_material.html">- Material</a></li>
+                </ul>
+            </li>
+
+                <li><a href="proveedores.html">Proveedores</a></li>
+                <li><a href="compras.html">Compras (Surtir)</a></li> 
+        </ul>
+    </nav>
+
+    <main>
+        <header>
+            <button id="btn-menu-movil" class="btn-menu">☰</button>
+            <div class="letrero-madera">
+                <h1>ARTESANIAS<br>MAURICIO</h1>
+            </div>
+            <div class="info-sesion">
+                <p>USUARIO: ADMINISTRADOR | FECHA: 10/02/26 | HORA: 12:50 PM</p>
+            </div>
+        </header>
+
+        <h2>Historial de Compras (Entrada de Material)</h2>
+        
+        <section class="barra-busqueda" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <button id="btn-nueva-compra" class="btn-principal">Registrar nueva compra</button>
+            
+            <form style="display: flex; gap: 10px;">
+                <input type="text" placeholder="Buscar por fecha o proveedor...">
+                <button type="button" class="btn-secundario">Buscar</button>
+            </form>
+        </section>
+
+        <section>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Fecha</th>
+                        <th>Proveedor</th>
+                        <th>Total Pagado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#001</td>
+                        <td>10/02/2026</td>
+                        <td>Maderas Uriel</td>
+                        <td>$1,500.00</td>
+                        <td><button class="btn-editar">Ver Detalle</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <dialog id="modal-compra">
+            <h2>Registrar Compra de Material</h2>
+            
+            <form id="form-compra">
+                <div class="input-group">
+                    <label for="compra-proveedor">Proveedor:</label>
+                    <select id="compra-proveedor" required>
+                        <option value="">-- Selecciona un proveedor --</option>
+                        <option value="1">Maderas Uriel</option>
+                        <option value="2">Vidrios José</option>
+                    </select>
+                </div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 2px solid var(--color-primario);">
+
+                <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px;">
+                    <div class="input-group" style="flex: 2; margin-bottom: 0;">
+                        <label for="compra-material">Material:</label>
+                        <select id="compra-material">
+                            <option value="1">Tablas de pino</option>
+                            <option value="2">Lámina</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="compra-cantidad">Cantidad:</label>
+                        <input type="number" id="compra-cantidad" placeholder="Ej. 10">
+                    </div>
+                    <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="compra-precio">Precio U.:</label>
+                        <input type="number" id="compra-precio" placeholder="$">
+                    </div>
+                    <button type="button" class="btn-secundario" style="font-size: 1.2rem; padding: 10px 15px;">+</button>
+                </div>
+
+                <table style="margin-top: 10px; box-shadow: none; border: 1px solid var(--borde);">
+                    <thead>
+                        <tr>
+                            <th style="font-size: 0.8rem; padding: 10px;">Material</th>
+                            <th style="font-size: 0.8rem; padding: 10px;">Cant.</th>
+                            <th style="font-size: 0.8rem; padding: 10px;">Subtotal</th>
+                            <th style="font-size: 0.8rem; padding: 10px;">Quitar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+
+                <p style="text-align: right; font-size: 1.2rem; margin-top: 15px;">
+                    Total pagado: <strong id="compra-total-pagar" style="color: var(--color-primario);">$0.00</strong>
+                </p>
+
+                <div class="modal-acciones">
+                    <button type="button" id="btn-cancelar-compra">Cancelar</button>
+                    <button type="submit" class="btn-principal">Guardar Compra</button>
+                </div>
+            </form>
+        </dialog>
+    </main>
+
+    <script src="js/ui.js"></script>
+</body>
+</html>
+</body>
+</html>
