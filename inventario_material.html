@@ -8,8 +8,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/conexion.js"></script>
-    <script src='js/datos.js'></script>
     <script src="js/ui.js"></script>
+    <script src="js/material.js"></script>
     
 </head>
 <body>
@@ -38,7 +38,7 @@
     <main>
         <header>
             <h1>Artesanías Mauricio</h1>
-            <p>USUARIO: ADMINISTRADOR | FECHA: 10/02/26 | HORA: 12:50 PM</p>
+            <p>USUARIO: <span id="header-usuario">CARGANDO...</span> | FECHA: <span id="header-fecha">--/--/--</span> | HORA: <span id="header-hora">--:--</span></p>
             <button id="btn-menu-movil" class="btn-menu">☰</button>
             
           
@@ -48,32 +48,33 @@
             <h2>Inventario - Material</h2>
             
                 <section class="controles-superiores">
-                <button id="btn-nuevo-material" class="btn-principal">Registrar nuevo material</button>
-                <dialog id="modal-nuevo-material">
-                <h2>Agregar nuevo material</h2>
-                <form id="form-nuevo-material">
-                <div class="input-group">
-                    <label for="material-nombre">Nombre:</label>
-                    <input type="text" id="material-nombre" placeholder="Ej. Lamina" required>
-                </div>
+                    <button id="btn-nuevo-material" class="btn-principal">Registrar nuevo material</button>
+
+                    <dialog id="modal-nuevo-material">
+                        <h2>Agregar nuevo material</h2>
+                        <form id="form-nuevo-material">
+                            <div class="input-group">
+                                <label for="material-nombre">Nombre:</label>
+                                <input type="text" id="material-nombre" placeholder="Ej. Lamina" required>
+                            </div>
             
-                <div class="input-group">
-                    <label for="material-unidad">Unidad:</label>
-                    <input type="text" id="material-unidad" placeholder="piezas" required>
-                </div>
+                            <div class="input-group">
+                                <label for="material-unidad">Unidad:</label>
+                                <input type="text" id="material-unidad" placeholder="piezas" required>
+                            </div>
 
-                <div class="input-group">
-                    <label for="material-cantidad">Cantidad (Stock):</label>
-                    <input type="number" id="material-cantidad" placeholder="1" required>
-                </div>
+                            <div class="input-group">
+                                <label for="material-cantidad">Cantidad (Stock):</label>
+                                <input type="number" id="material-cantidad" placeholder="1" required>
+                            </div>
 
-            <div class="modal-acciones">
-                <button type="button" id="btn-cancelar-material">Cancelar</button>
-                <button type="submit">Aceptar</button>
-            </div>
-        </form>
-        </dialog>
-            </section>
+                            <div class="modal-acciones">
+                                <button type="button" id="btn-cancelar-material">Cancelar</button>
+                                <button type="submit">Aceptar</button>
+                            </div>
+                        </form>
+                    </dialog>
+                </section>
 
             <section class="barra-busqueda">
                 <form class="barra-busqueda">
@@ -86,47 +87,45 @@
                 <thead>
                     <tr>
                         <th>Id</th>
-                        <th>Material</th>
                         <th>Nombre Material</th>
                         <th>Unidad</th>
                         <th>Stock</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Madera</td>
-                        <td>Triplay</td>
-                        <td>20</td>
-                        <td>100</td>
-                        <td><button class="btn-editar">Editar</button></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Vidrio</td>
-                        <td>M^2</td> <td>100</td>
-                        <td>100</td>
-                        <td><button class="btn-editar">Editar</button></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Lamina</td>
-                        <td>M^2</td> <td>30</td>
-                        <td>30</td>
-                        <td><button class="btn-editar">Editar</button></td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Tubos</td>
-                        <td>3 m</td> <td>3</td>
-                        <td>3</td>
-                        <td><button class="btn-editar">Editar</button></td>
-                    </tr>
-                </tbody>
+                <tbody id="tabla-body-material"></tbody>
             </table>
         </section>
     </main>
+
+    <dialog id="modal-editar-material">
+        <form id="form-editar-material">
+            <h2>Actualizar Material</h2>
+
+            <div class="input-group">
+                <label>Nombre Material:</label>
+                <input type="text" id="edit-nombre" required>
+            </div>
+
+            <div class="input-group">
+                <label>Unidad:</label>
+                <input type="text" id="edit-unidad" placeholder="Unidad" required>
+            </div>
+
+            <div class="input-group">
+                <label>Stock:</label>
+                <input type="text" id="edit-stock" placeholder="stock" required>
+            </div>
+
+            <div class="modal-acciones">
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" id="btn-cerrar-edit">Cancelar</button>
+                <button type="button" id="btn-eliminar-registro" style="background-color: #ff5f5f; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 10px;">
+                    <i class="fas fa-trash-alt"></i> Eliminar
+                </button>
+            </div>
+        </form>
+    </dialog>
 
 
 </body>

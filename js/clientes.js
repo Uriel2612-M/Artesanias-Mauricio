@@ -1,9 +1,11 @@
 let clienteEditandoId = null;
+let ventasEditandoId = null;
 
 // =====================================
 // 1. CARGAR CLIENTES (LEER)
 // =====================================
 async function cargarClientes() {
+    
     const cuerpoTabla = document.getElementById('tabla-clientes-body');
     
     if (!cuerpoTabla) return;
@@ -80,12 +82,40 @@ async function prepararEdicion(id) {
 // =====================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    
-    
+
+    function iniciarEncabezado() {
+        const nombre = localStorage.getItem('nombreUsuario') || 'Desconocido';
+        const idRol = localStorage.getItem('rolUsuario');
+        const textoRol = idRol === '1' ? 'ADMIN' : 'USUARIO';
+        
+        const elUsuario = document.getElementById('header-usuario');
+        if(elUsuario) elUsuario.textContent = `${nombre.toUpperCase()} (${textoRol})`;
+
+        setInterval(() => {
+            const elFecha = document.getElementById('header-fecha');
+            const elHora = document.getElementById('header-hora');
+            const ahora = new Date();
+            if(elFecha) elFecha.textContent = ahora.toLocaleDateString('es-MX');
+            if(elHora) elHora.textContent = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+        }, 1000);
+    }
+    iniciarEncabezado();
     cargarClientes();
     
     const formCliente = document.getElementById('form-cliente');
-    
+    const modalCliente = document.getElementById('modal-cliente'); 
+
+    // =====================================
+    // BOTÓN CANCELAR
+    // =====================================
+    const btnCancelar = document.getElementById('btn-cancelar-cliente'); 
+    if (btnCancelar) {
+        btnCancelar.onclick = () => {
+            if (modalCliente) modalCliente.close();
+            if (formCliente) formCliente.reset();  
+            clienteEditandoId = null;              
+        };
+    }
     if (formCliente) {
         formCliente.addEventListener('submit', async (e) => {
             e.preventDefault(); 
@@ -103,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         .eq('id_cliente', clienteEditandoId); 
 
                     if (error) throw error;
-                    alert('¡Cliente actualizado al cien!');
+                    alert('¡Cliente actualizado!');
 
                 } else {
                     
@@ -128,6 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
+    
 });
 
-let ventasEditandoId = null;
+

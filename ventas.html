@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ventas</title>
     <link rel="stylesheet" href="css/global.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/conexion.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/venta.js"></script>
+    <script src="js/outh.js"></script>
 </head>
 <body>
     <nav>
@@ -26,7 +31,7 @@
                         <li><a href="proveedores.html">Proveedores</a></li>
                         <li><a href="compras.html">Compras</a></li>
                     </ul>
-                </li>
+            </li>
         </ul>
     </nav>
 
@@ -147,10 +152,20 @@
         <h2>Actualizar Pago y Cliente</h2>
         <input type="hidden" id="edit-id-venta">
         <input type="hidden" id="edit-id-cliente">
+        <div class="input-group">
+            <label>Nombre Cliente:</label>
+            <input type="text" id="edit-nombre" placeholder="Nombre">
+        </div>
 
-        <input type="text" id="edit-nombre" placeholder="Nombre">
-        <input type="text" id="edit-apellidos" placeholder="Apellidos">
-        <input type="text" id="edit-telefono" placeholder="Teléfono">
+        <div class="input-group">
+            <label>Apellidos:</label>
+            <input type="text" id="edit-apellidos" placeholder="Apellidos">
+        </div>
+
+        <div class="input-group">
+            <label>Teléfono</label>
+            <input type="text" id="edit-telefono" placeholder="Teléfono">
+        </div>
 
         <label>Total de la Venta ($):</label>
         <input type="number" id="edit-total-venta" readonly style="background:#eee">
@@ -171,10 +186,7 @@
         </div>
     </form>
 </dialog>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/conexion.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/venta.js"></script>
-    <script src="js/menu.js"></script>
+    
+    
 </body>
 </html>

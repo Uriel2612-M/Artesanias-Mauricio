@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-apellidos').value = v.cliente?.apellidos || '';
         document.getElementById('edit-telefono').value = v.cliente?.telefono || '';
 
-        // Dinero (Aquí es donde Mauricio actualiza el pago)
+        // Dinero 
         document.getElementById('edit-total-venta').value = v.total_venta || v.monto_pagado || 0;
         document.getElementById('edit-monto-pagado').value = v.monto_pagado || 0;
         document.getElementById('edit-estado-pago').value = v.estado_pago || 'Pagado';

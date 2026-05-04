@@ -510,19 +510,16 @@ dialog p strong {
     }
 }
 @media screen and (max-width: 600px) {
-    /* 1. La tabla deja de comportarse como tabla */
     table, thead, tbody, th, td, tr {
         display: block;
     }
 
-    /* 2. Ocultamos el encabezado (los nombres de las columnas) */
     thead tr {
         position: absolute;
         top: -9999px;
         left: -9999px;
     }
 
-    /* 3. Cada fila ahora es una tarjeta con espacio entre ellas */
     tr {
         background: #1a1a1a;
         border: 1px solid #333;
@@ -532,19 +529,18 @@ dialog p strong {
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    /* 4. Cada celda se vuelve una línea de texto */
     td {
         border: none;
         position: relative;
-        padding-left: 50%; /* Espacio para el nombre de la columna */
+        padding-left: 50%; 
         text-align: right;
         font-size: 16px;
         margin-bottom: 8px;
     }
 
-    /* 5. Ponemos el nombre de la columna ANTES del dato */
+    
     td::before {
-        content: attr(data-label); /* Necesitas agregar data-label="Nombre" en tu HTML/JS */
+        content: attr(data-label); 
         position: absolute;
         left: 10px;
         width: 45%;

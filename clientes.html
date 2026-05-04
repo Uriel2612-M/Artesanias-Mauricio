@@ -10,6 +10,7 @@
     <script src="js/conexion.js"></script>
     <script src='js/clientes.js'></script>
     <script src="js/ui.js"></script>
+    <script src="js/outh.js"></script>
     
 </head>
 <body>
@@ -38,7 +39,7 @@
     <main>
         <header>
             <h1>Artesanías Mauricio</h1>
-            <p>USUARIO: ADMINISTRADOR | FECHA: 10/02/26 | HORA: 12:50 PM</p>
+            <p>USUARIO: <span id="header-usuario">CARGANDO...</span> | FECHA: <span id="header-fecha">--/--/--</span> | HORA: <span id="header-hora">--:--</span></p>
             <button id="btn-menu-movil" class="btn-menu">☰</button>
            
         </header>
@@ -72,7 +73,23 @@
                 <label for="cliente-nombre">Nombre:</label>
                 <input type="text" id="cliente-nombre" required>
             </div>
-            </form>
+
+            <div class="input-group">
+                <label for="cliente-apellidos">Apellidos:</label>
+                <input type="text" id="cliente-apellidos" required>
+            </div>
+
+            <div class="input-group">
+                <label for="cliente-telefono">Teléfono: </label>
+                <input type="text" id="cliente-telefono" required>
+            </div>
+
+            <div class="modal-acciones">
+            <button type="submit">Guardar Cambios</button>
+            <button type="button" id="btn-cancelar-cliente">Cancelar</button>
+        </div>
+        </form>
+
     </dialog>
 
 </body>

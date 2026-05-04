@@ -7,8 +7,9 @@
     <link rel="stylesheet" href="css/global.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/conexion.js"></script>
-    <script src='js/datos.js'></script>
+    <script src='js/producto.js'></script>
     <script src="js/ui.js"></script>
+    <script src="js/outh.js"></script>
 </head>
 <body>
     <nav>
@@ -36,7 +37,7 @@
     <main>
         <header>
             <h1>Artesanías Mauricio</h1>
-            <p>USUARIO: ADMINISTRADOR | FECHA: 10/02/26 | HORA: 12:50 PM</p>
+            <p>USUARIO: <span id="header-usuario">CARGANDO...</span> | FECHA: <span id="header-fecha">--/--/--</span> | HORA: <span id="header-hora">--:--</span></p>
             <button id="btn-menu-movil" class="btn-menu">☰</button>
             
         
@@ -48,38 +49,39 @@
             <section class="controles-superiores">
                 <button id="btn-nueva-artesania" class="btn-principal">Registrar nueva artesanía</button>
                 <dialog id="modal-nueva-artesania">
-                <h2>Agregar nueva artesanía</h2>
-                <form id="form-nueva-artesania">
-                <div class="input-group">
-                    <label for="artesania-nombre">Nombre:</label>
-                    <input type="text" id="artesania-nombre" placeholder="Ej. Elefantes" required>
-                </div>
+                    <h2>Agregar nueva artesanía</h2>
+                    <form id="form-nueva-artesania">
+                    <div class="input-group">
+                        <label for="artesania-nombre">Nombre:</label>
+                        <input type="text" id="artesania-nombre" placeholder="Ej. Elefantes" required>
+                    </div>
             
-                <div class="input-group">
-                    <label for="artesania-unidad">Unidad:</label>
-                    <input type="text" id="artesania-unidad" placeholder="piezas" required>
-                </div>
+                    <div class="input-group">
+                        <label for="artesania-unidad">Unidad:</label>
+                        <input type="text" id="artesania-unidad" placeholder="piezas" required>
+                    </div>
 
-                <div class="input-group">
-                    <label for="artesania-precio">Precio:</label>
-                    <input type="number" id="artesania-precio" placeholder="900" required>
-                </div>
+                    <div class="input-group">
+                        <label for="artesania-precio">Precio:</label>
+                        <input type="number" id="artesania-precio" placeholder="900" required>
+                    </div>
 
-                <div class="input-group">
-                    <label for="artesania-cantidad">Cantidad (Stock):</label>
-                    <input type="number" id="artesania-cantidad" value="1" required>
-                </div>
+                    <div class="input-group">
+                        <label for="artesania-cantidad">Cantidad (Stock):</label>
+                        <input type="number" id="artesania-cantidad" placeholder="1" required>
+                    </div>
 
-                <hr style="margin: 20px 0; border: 0; border-top: 2px solid var(--color-primario);">
-
-                <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px;">
-                    <div class="input-group" style="flex: 2; margin-bottom: 0;">
+                    <hr style="margin: 20px 0; border: 0; border-top: 2px solid var(--color-primario);">
+                    <H3>Seleccionar Materiales</H3>
+                    <br>
+                    <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px;">
+                        <div class="input-group" style="flex: 2; margin-bottom: 0;">
                         <label for="material-select">Material:</label>
-                        <input type="text" id="material-select" placeholder="Ej. vidrio">
+                        <select type="select" id="material-select" placeholder="Ej. vidrio"></select>
                     </div>
                     <div class="input-group" style="flex: 1; margin-bottom: 0;">
                         <label for="material-cantidad">Cantidad:</label>
-                        <input type="number" id="material-cantidad" placeholder="3">
+                        <input type="number" id="material-cantidad">
                     </div>
                     <button type="button" class="btn-secundario" style="font-size: 1.2rem; padding: 10px 15px;">+</button>
                 </div>
@@ -103,7 +105,7 @@
             </table>
 
             <div class="modal-acciones">
-                <button type="button" id="btn-cancelar-artesania">Cancelar</button>
+                <button type="button" id="btn-cancelar-producto">Cancelar</button>
                 <button type="submit">Aceptar</button>
             </div>
         </form>
@@ -121,57 +123,52 @@
                 <thead>
                     <tr>
                         <th>Id</th>
-                        <th>Producto</th>
-                        <th>Nombre producto</th>
+                        <th>Nombre Artesania</th>
                         <th>Unidad</th>
                         <th>Precio</th>
                         <th>Stock</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Jarrones</td>
-                        <td>Jarrones vidrio</td>
-                        <td>pieza</td>
-                        <td>$90</td>
-                        <td>1</td>
-                        <td><button class="btn-editar">Editar</button></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Recibidor</td>
-                        <td>Recibidor madera</td>
-                        <td>unitario</td>
-                        <td>$1000</td>
-                        <td>2</td>
-                        <td><button class="btn-editar">Editar</button></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Lámpara</td>
-                        <td>Lámpara forja</td>
-                        <td>unitario</td>
-                        <td>$300</td>
-                        <td>1</td>
-                        <td><button class="btn-editar">Editar</button></td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Mesa</td>
-                        <td>Mesa centro</td>
-                        <td>unitario</td>
-                        <td>$800</td>
-                        <td>4</td>
-                        <td><button class="btn-editar">Editar</button></td>
-                    </tr>
-                </tbody>
+                <tbody id="tabla-producto-body"></tbody>
             </table>
             
         </section>
 
     </main>
-    <script src="js/ui.js"></script>
+    <dialog id="modal-editar-producto">
+        <form id="form-editar-producto">
+            <h2>Actualizar Artesania</h2>
+
+            <div class="input-group">
+                <label>Nombre Artesania:</label>
+                <input type="text" id="edit-nombre" required>
+            </div>
+
+            <div class="input-group">
+                <label>Unidad:</label>
+                <input type="text" id="edit-unidad" placeholder="Unidad" required>
+            </div>
+
+            <div class="input-group">
+                <label>Precio:</label>
+                <input type="text" id="edit-precio" placeholder="Precio" required>
+            </div>
+
+            <div class="input-group">
+                <label>Stock:</label>
+                <input type="text" id="edit-stock" placeholder="stock" required>
+            </div>
+
+            <div class="modal-acciones">
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" id="btn-cerrar-edit">Cancelar</button>
+                <button type="button" id="btn-eliminar-registro" style="background-color: #ff5f5f; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 10px;">
+                    <i class="fas fa-trash-alt"></i> Eliminar
+                </button>
+            </div>
+        </form>
+    </dialog>
+    
 </body>
 </html>
