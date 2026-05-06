@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const inputPassword = document.getElementById('login-password').value;
 
             if (inputUsuario === '' || inputPassword === '') {
-                alert('Por favor, llena todos los campos, apa.');
+                alert('Por favor, llena todos los campos.');
                 return;
             }
 

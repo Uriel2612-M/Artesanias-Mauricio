@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compras</title>
     <link rel="stylesheet" href="css/global.css">
-</head>
-<body>
-    <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compras - Artesanías Mauricio</title>
-    <link rel="stylesheet" href="css/global.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/conexion.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/outh.js"></script>
+    <script src="js/compra.js"></script>
 </head>
 <body>
     <nav>
@@ -42,7 +39,8 @@
                 <h1>ARTESANIAS<br>MAURICIO</h1>
             </div>
             <div class="info-sesion">
-                <p>USUARIO: ADMINISTRADOR | FECHA: 10/02/26 | HORA: 12:50 PM</p>
+                <p>USUARIO: <span id="header-usuario">CARGANDO...</span> | FECHA: <span id="header-fecha">--/--/--</span> | HORA: <span id="header-hora">--:--</span></p>
+                <button id="btn-menu-movil" class="btn-menu">☰</button>
             </div>
         </header>
 
@@ -65,18 +63,10 @@
                         <th>Fecha</th>
                         <th>Proveedor</th>
                         <th>Total Pagado</th>
-                        <th>Acciones</th>
+                        
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>#001</td>
-                        <td>10/02/2026</td>
-                        <td>Maderas Uriel</td>
-                        <td>$1,500.00</td>
-                        <td><button class="btn-editar">Ver Detalle</button></td>
-                    </tr>
-                </tbody>
+                <tbody id="tabla-body-compras"></tbody>
             </table>
         </section>
 
@@ -88,19 +78,15 @@
                     <label for="compra-proveedor">Proveedor:</label>
                     <select id="compra-proveedor" required>
                         <option value="">-- Selecciona un proveedor --</option>
-                        <option value="1">Maderas Uriel</option>
-                        <option value="2">Vidrios José</option>
                     </select>
                 </div>
 
                 <hr style="margin: 20px 0; border: 0; border-top: 2px solid var(--color-primario);">
 
-                <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px;">
+        
                     <div class="input-group" style="flex: 2; margin-bottom: 0;">
                         <label for="compra-material">Material:</label>
                         <select id="compra-material">
-                            <option value="1">Tablas de pino</option>
-                            <option value="2">Lámina</option>
                         </select>
                     </div>
                     <div class="input-group" style="flex: 1; margin-bottom: 0;">
@@ -108,28 +94,9 @@
                         <input type="number" id="compra-cantidad" placeholder="Ej. 10">
                     </div>
                     <div class="input-group" style="flex: 1; margin-bottom: 0;">
-                        <label for="compra-precio">Precio U.:</label>
-                        <input type="number" id="compra-precio" placeholder="$">
+                        <label for="total-compra">Precio total de la compra:</label>
+                        <input type="number" id="total-compra" placeholder="$">
                     </div>
-                    <button type="button" class="btn-secundario" style="font-size: 1.2rem; padding: 10px 15px;">+</button>
-                </div>
-
-                <table style="margin-top: 10px; box-shadow: none; border: 1px solid var(--borde);">
-                    <thead>
-                        <tr>
-                            <th style="font-size: 0.8rem; padding: 10px;">Material</th>
-                            <th style="font-size: 0.8rem; padding: 10px;">Cant.</th>
-                            <th style="font-size: 0.8rem; padding: 10px;">Subtotal</th>
-                            <th style="font-size: 0.8rem; padding: 10px;">Quitar</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
-                </table>
-
-                <p style="text-align: right; font-size: 1.2rem; margin-top: 15px;">
-                    Total pagado: <strong id="compra-total-pagar" style="color: var(--color-primario);">$0.00</strong>
-                </p>
 
                 <div class="modal-acciones">
                     <button type="button" id="btn-cancelar-compra">Cancelar</button>
@@ -139,8 +106,6 @@
         </dialog>
     </main>
 
-    <script src="js/ui.js"></script>
-</body>
-</html>
+    
 </body>
 </html>

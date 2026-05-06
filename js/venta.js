@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     let carrito = [];
     let totalVenta = 0;
+    let ventaSeleccionadaId = null;
 
     // --- 1. ENCABEZADO ---
     function iniciarEncabezado() {
@@ -53,12 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             renderizarCarrito();
         } else {
-            alert("Pon nombre, cantidad y precio válido, apa.");
+            alert("Coloca nombre, cantidad y precio válido.");
         }
     };
 
     function renderizarCarrito() {
         const cuerpo = document.getElementById('cuerpo-carrito');
+        if (!cuerpo) return;
         cuerpo.innerHTML = '';
         totalVenta = 0;
         carrito.forEach((item, index) => {
@@ -71,12 +73,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><button type="button" onclick="quitarItem(${index})">x</button></td>
                 </tr>`;
         });
-        // AQUÍ ESTÁ EL TRUCO: Actualizamos el texto y el input oculto para la resta
+        
         document.getElementById('total-pre-venta').textContent = totalVenta;
         if(document.getElementById('v-total-calculado')) {
             document.getElementById('v-total-calculado').value = totalVenta;
         }
-    }
+        const elTotalLabel = document.getElementById('total-pre-venta');
+        if (elTotalLabel) elTotalLabel.textContent = totalVenta;
+        const elTotalInput = document.getElementById('v-total-calculado');
+        if (elTotalInput) elTotalInput.value = totalVenta;
+}
+    
 
     window.quitarItem = (index) => {
         carrito.splice(index, 1);
@@ -210,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.abrirEditorVenta = (datosStr) => {
     try {
         const v = JSON.parse(datosStr);
+        ventaSeleccionadaId = v.id_venta;
         const modalEdit = document.getElementById('modal-editar-venta');
         
         // IDs
@@ -281,4 +289,29 @@ document.addEventListener('DOMContentLoaded', () => {
         alert("Error: " + err.message);
     }
 };
+const btnEliminarP = document.getElementById('btn-eliminar-venta');
+        if (btnEliminarP) {
+            btnEliminarP.onclick = async () => {
+        
+        if (!ventaSeleccionadaId) return;
+
+        const confirmar = confirm("¿Estás seguro de eliminar esta venta? Esta acción no se puede deshacer.");
+        
+        if (confirmar) {
+            try {
+                const { error } = await supabaseClient
+                    .from('venta') 
+                    .delete()
+                    .eq('id_venta', ventaSeleccionadaId);
+
+                if (error) throw error;
+
+                alert("¡Venta eliminada del inventario!");
+                location.reload(); 
+            } catch (err) {
+                alert("Error al eliminar: " + err.message);
+            }
+        }
+    };
+    }
 });

@@ -84,53 +84,80 @@ document.addEventListener('DOMContentLoaded', () => {
             if(elHora) elHora.textContent = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
         }, 1000);
     }
-    
     iniciarEncabezado();
     cargarProveedores();
-    
-    const formProve = document.getElementById('form-proveedores');
-    const modalProve = document.getElementById('modal-proveedor'); 
 
-    // BOTÓN CANCELAR
-    const btnCancelar = document.getElementById('btn-cancelar-proveedor'); 
-    if (btnCancelar) {
-        btnCancelar.onclick = () => {
-            if (modalProve) modalProve.close();
-            if (formProve) formProve.reset();  
-            proveedoresEditandoId = null;               
+    const modalProve = document.getElementById('modal-proveedor');
+    const formProve = document.getElementById('form-proveedores');
+
+    // === BOTÓN "REGISTRAR NUEVO" (Limpia el modal para agregar) ===
+    const btnNuevo = document.getElementById('btn-nuevo-proveedor');
+    if (btnNuevo) {
+        btnNuevo.onclick = () => {
+            proveedoresEditandoId = null; // MODO NUEVO
+            formProve.reset();
+            
+            modalProve.showModal();
         };
     }
 
+    // === BOTÓN CANCELAR ===
+    const btnCancelar = document.getElementById('btn-cancelar-proveedor');
+    if (btnCancelar) {
+        btnCancelar.onclick = () => {
+            modalProve.close();
+            formProve.reset();
+            proveedoresEditandoId = null;
+        };
+    }
+
+    // === LÓGICA DE GUARDAR (INSERT O UPDATE) ===
     if (formProve) {
-        formProve.addEventListener('submit', async (e) => {
-            e.preventDefault(); 
-            const nombre = document.getElementById('proveedor-nombre').value;
-            const direccion = document.getElementById('proveedor-direccion').value;
-            const telefono = document.getElementById('proveedor-telefono').value;
+        formProve.onsubmit = async (e) => {
+            e.preventDefault();
+
+            // Obtenemos los valores de los inputs (asegúrate de que los IDs coincidan con tu HTML)
+            const nombreVal = document.getElementById('proveedor-nombre').value;
+            const direccionVal = document.getElementById('proveedor-direccion').value;
+            const telefonoVal = document.getElementById('proveedor-telefono').value;
 
             try {
                 if (proveedoresEditandoId) {
+                    // SI HAY ID -> ACTUALIZAMOS (UPDATE)
                     const { error } = await supabaseClient
                         .from('proveedor')
-                        .update({ nombre_proveedor: nombre, direccion: direccion, telefono: telefono })
-                        .eq('id_proveedor', proveedoresEditandoId); 
+                        .update({ 
+                            nombre_proveedor: nombreVal, 
+                            direccion: direccionVal, 
+                            telefono: telefonoVal 
+                        })
+                        .eq('id_proveedor', proveedoresEditandoId);
+                    
                     if (error) throw error;
                     alert('¡Proveedor actualizado!');
                 } else {
+                    // NO HAY ID -> INSERTAMOS (INSERT)
                     const { error } = await supabaseClient
                         .from('proveedor')
-                        .insert([{ nombre_proveedor: nombre, direccion: direccion, telefono: telefono }]);
+                        .insert([{ 
+                            nombre_proveedor: nombreVal, 
+                            direccion: direccionVal, 
+                            telefono: telefonoVal 
+                        }]);
+                    
                     if (error) throw error;
-                    alert('¡Proveedor nuevo registrado!');
+                    alert('¡Nuevo proveedor registrado!');
                 }
 
                 formProve.reset();
-                proveedoresEditandoId = null;
                 modalProve.close();
-                cargarProveedores(); 
+                proveedoresEditandoId = null;
+                cargarProveedores(); // Refrescamos la tabla
+
             } catch (err) {
                 alert("Error al guardar: " + err.message);
+                console.error(err);
             }
-        });
+        };
     }
 });

@@ -41,7 +41,34 @@
             <button id="btn-menu-movil" class="btn-menu">☰</button>
            
         </header>
-        <h2>Directorio de Porveedores</h2>
+        <h2>Directorio de Proveedores</h2>
+        <section class="controles-superiores">
+            <button id="btn-nuevo-proveedor" class="btn-principal">Registrar nuevo proveedor</button>
+            <dialog id="modal-proveedor">
+            <h2>Registrar Proveedor de Material</h2>
+            
+            <form id="form-proveedores">
+                <div class="input-group">
+                    <label for="proveedor-nombre">Nombre del Proveedor:</label>
+                    <input type="text" id="proveedor-nombre" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="proveedor-telefono">Teléfono del Proveedor:</label>
+                    <input type="number" id="proveedor-telefono" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="proveedor-direccion">Dirección: </label>
+                    <input type="text" id="proveedor-direccion" required>
+                </div>
+                <div class="modal-acciones">
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" id="btn-cancelar-proveedor">Cancelar</button>
+                </div>
+            </form>
+            </dialog>
+        </section>
         <section class="barra-busqueda">
             <form class="barra-busqueda">
             <input type="text" placeholder="Buscar cliente...">
@@ -64,6 +91,32 @@
             </table>
         </section>
     </main>
+
+    <dialog id="modal-proveedor">
+        <form id="form-proveedores">
+            <div class="input-group">
+                <label for="proveedor-nombre">Nombre:</label>
+                <input type="text" id="proveedor-nombre" required>
+            </div>
+
+            <div class="input-group">
+                <label for="proveedor-direccion">Dirección:</label>
+                <input type="text" id="proveedor-direccion" required>
+            </div>
+
+            <div class="input-group">
+                <label for="proveedor-telefono">Telefono:</label>
+                <input type="text" id="proveedor-telefono" required>
+            </div>
+
+            <div class="modal-acciones">
+            <button type="submit">Guardar Cambios</button>
+            <button type="button" id="btn-cancelar-proveedor">Cancelar</button>
+        </div>
+        </form>
+
+    </dialog>
+     
     
 </body>
 
