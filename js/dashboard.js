@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
-    // 2. CÁLCULOS (Aquí es donde va el async)
+    // 2. CÁLCULOS 
     async function cargarEstadisticas() {
         try {
             // Fecha Local México

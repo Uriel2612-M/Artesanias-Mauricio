@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         id_compra: nuevaCompra.id_compra,
                         id_material: idMat,
                         cantidad: cantidad,
-                        precio_unitario: (total / cantidad) // Calculamos unitario
+                        precio_unitario: (total / cantidad) 
                     }]);
 
                 if (errD) throw errD;

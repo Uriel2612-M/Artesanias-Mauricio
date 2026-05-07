@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let carrito = [];
     let totalVenta = 0;
     let ventaSeleccionadaId = null;
+    let listaProductosBD = [];
 
     // --- 1. ENCABEZADO ---
     function iniciarEncabezado() {
@@ -38,10 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const nombreArt = document.getElementById('v-artesania-nombre').value;
         const cant = parseInt(document.getElementById('v-cantidad').value);
         const precioManual = parseFloat(document.getElementById('v-precio-unitario').value);
+        const prodBD = listaProductosBD.find(p => p.nombre === nombreArt);
+        const idReal = prodBD ? prodBD.id_producto : null;
 
         if(nombreArt && cant > 0 && precioManual > 0) {
             carrito.push({ 
-                id_producto: 1, 
+                id_producto: idReal,
                 nombre: nombreArt, 
                 cant, 
                 precio: precioManual, 
@@ -60,9 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderizarCarrito() {
         const cuerpo = document.getElementById('cuerpo-carrito');
-        if (!cuerpo) return;
+        if (!cuerpo) return; // Si no hay carrito en la página, se sale sin tronar
+        
         cuerpo.innerHTML = '';
         totalVenta = 0;
+        
         carrito.forEach((item, index) => {
             totalVenta += item.subtotal;
             cuerpo.innerHTML += `
@@ -74,15 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 </tr>`;
         });
         
-        document.getElementById('total-pre-venta').textContent = totalVenta;
-        if(document.getElementById('v-total-calculado')) {
-            document.getElementById('v-total-calculado').value = totalVenta;
-        }
+        // --- ACTUALIZAR TOTALES CON SEGURO ---
         const elTotalLabel = document.getElementById('total-pre-venta');
         if (elTotalLabel) elTotalLabel.textContent = totalVenta;
+        
         const elTotalInput = document.getElementById('v-total-calculado');
-        if (elTotalInput) elTotalInput.value = totalVenta;
-}
+        if (elTotalInput) {
+            elTotalInput.value = totalVenta;
+            elTotalInput.dispatchEvent(new Event('input')); 
+        }
+    }
     
 
     window.quitarItem = (index) => {
@@ -106,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 .insert([{
                     nombre: document.getElementById('v-nombre').value,
                     apellidos: document.getElementById('v-apellidos').value,
-                    telefono: document.getElementById('v-telefono').value
                 }])
                 .select().single();
 
@@ -139,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (errDetalle) throw errDetalle;
 
-            alert("¡Venta registrada con éxito, apa!");
+            alert("¡Venta registrada con éxito!");
             location.reload();
 
         } catch (error) {
@@ -196,8 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <small style="color: #888; font-size: 0.8em;">${fechaFormateada}</small>
                         </td>
                         <td data-label="Cliente">${nom}</td>              
-                        <td>${ape}</td>               
-                        <td>${tel}</td>               
+                        <td>${ape}</td>                    
                         <td>${nombresArt}</td>        
                         <td>$${totalReal}</td>        
                         <td>$${abono}</td>            
@@ -211,7 +215,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
         console.error("Error:", err);
     }
+
 }
+   
 
     // --- 6. EDICIÓN ---
     window.abrirEditorVenta = (datosStr) => {
@@ -253,9 +259,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (elSaldo) elSaldo.value = restante.toFixed(2);
         });
     }
+    // === LÓGICA DEL BUSCADOR DE VENTAS ===
+    const inputBuscador = document.querySelector('.barra-busqueda input'); 
+
+    if (inputBuscador) {
+    // Escuchamos cada vez que Mauricio teclea una letra
+        inputBuscador.addEventListener('keyup', (e) => {
+            const textoBusqueda = e.target.value.toLowerCase();
+        // Agarramos todas las filas de la tabla de ventas
+            const filas = document.querySelectorAll('#cuerpo-ventas tr');
+
+            filas.forEach(fila => {
+            // Convertimos todo el contenido de la fila a minúsculas
+            const contenidoFila = fila.textContent.toLowerCase();
+            
+            // Si la fila contiene lo que se escribió, la mostramos; si no, la ocultamos
+            if (contenidoFila.includes(textoBusqueda)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+    });
+}
 
     iniciarEncabezado();
     cargarVentas();
+    cargarProductosDatalist();
 
     document.getElementById('form-editar-venta').onsubmit = async (e) => {
     e.preventDefault();
@@ -314,4 +344,39 @@ const btnEliminarP = document.getElementById('btn-eliminar-venta');
         }
     };
     }
+    async function cargarProductosDatalist() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('producto')
+            .select('id_producto, nombre, precio');
+            
+        if (error) throw error;
+        
+        listaProductosBD = data; // Guardamos para la magia del autocompletado
+        const datalist = document.getElementById('lista-productos');
+        
+        if (datalist) {
+            datalist.innerHTML = '';
+            data.forEach(p => {
+                // Agregamos cada producto como opción sugerida
+                datalist.innerHTML += `<option value="${p.nombre}"></option>`;
+            });
+        }
+    } catch (err) {
+        console.error("Error al cargar productos para autocompletar:", err);
+    }
+}
+const inputNombreArt = document.getElementById('v-artesania-nombre');
+if (inputNombreArt) {
+    inputNombreArt.addEventListener('change', (e) => {
+        const nombreEscrito = e.target.value;
+        // Buscamos si lo que escribió existe en la BD
+        const productoEncontrado = listaProductosBD.find(p => p.nombre === nombreEscrito);
+        
+        if (productoEncontrado) {
+            // Si lo encontró, le ahorramos trabajo a Mauricio y ponemos el precio
+            document.getElementById('v-precio-unitario').value = productoEncontrado.precio;
+        }
+    });
+}
 });
