@@ -20,7 +20,7 @@
             <li><a href="ventas.html">Ventas</a></li>
             <li><a href="clientes.html">Clientes</a></li>
             <li>
-                Inventario
+                <h2>Inventario</h2>
                 <ul>
                     <li><a href="inventario_producto.html">- Producto</a></li>
                     <li><a href="inventario_material.html">- Material</a></li>
@@ -73,7 +73,7 @@
         </section>
         <section class="barra-busqueda">
             <form class="barra-busqueda">
-            <input type="text" placeholder="Buscar cliente...">
+            <input type="text" placeholder="Buscar proveedor...">
             <button type="submit" class="btn-secundario">Buscar</button>
             </form>
         </section>
@@ -94,30 +94,32 @@
         </section>
     </main>
 
-    <dialog id="modal-proveedor">
-        <form id="form-proveedores">
+    <dialog id="modal-edit-proveedor">
+        <form id="form-editar-proveedor">
+            
+            <h2>Editar Proveedor</h2>
             <div class="input-group">
-                <label for="proveedor-nombre">Nombre:</label>
-                <input type="text" id="proveedor-nombre" required>
+                <label for="edit-proveedor-nombre">Nombre del Proveedor:</label>
+                <input type="text" id="edit-proveedor-nombre" required>
             </div>
 
             <div class="input-group">
-                <label for="proveedor-direccion">Dirección:</label>
-                <input type="text" id="proveedor-direccion" required>
+                <label for="edit-proveedor-telefono">Teléfono del Proveedor:</label>
+                <input type="text" id="edit-proveedor-telefono">
             </div>
 
             <div class="input-group">
-                <label for="proveedor-telefono">Telefono:</label>
-                <input type="text" id="proveedor-telefono" required>
+                <label for="edit-proveedor-direccion">Dirección: </label>
+                <input type="text" id="edit-proveedor-direccion">
             </div>
 
             <div class="modal-acciones">
-            <button type="submit">Guardar Cambios</button>
-            <button type="button" id="btn-cancelar-proveedor">Cancelar</button>
-        </div>
+                <button type="submit">Guardar Cambios</button>
+                <button type="button" id="btn-cancelar-edit-proveedor">Cancelar</button>
+                <button type="button" id="btn-eliminar-proveedor" style="background: red;">Eliminar</button>
+            </div>
         </form>
-
-    </dialog>
+</dialog>
      
     
 </body>

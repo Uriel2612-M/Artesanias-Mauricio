@@ -39,11 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
             data.forEach(m => {
                 cuerpo.innerHTML += `
                     <tr>
-                        <td>${m.id_material}</td>
-                        <td>${m.nombre}</td>
-                        <td>${m.unidad || ''}</td>
-                        <td>${m.stock}</td>
-                        <td>
+                        <td data-label="ID">${m.id_material}</td>
+                        <td data-label="Nombre">${m.nombre}</td>
+                        <td data-label="Unidad">${m.unidad || ''}</td>
+                        <td data-label="Stock">${m.stock}</td>
+                        <td data-label="Acciones" class="solo-admin">
                             <button class="btn-editar" onclick="prepararEdicion(${m.id_material})">Editar</button>
                         </td>
                     </tr>
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
-    // --- LÓGICA PARA ELIMINAR ARTESANÍA ---
+    // --- LÓGICA PARA ELIMINAR Material ---
     const btnEliminarP = document.getElementById('btn-eliminar-registro');
         if (btnEliminarP) {
             btnEliminarP.onclick = async () => {
@@ -166,6 +166,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         };
+    }
+    const inputBuscador = document.querySelector('.barra-busqueda input'); 
+
+    if (inputBuscador) {
+    // Escuchamos cada vez que Mauricio teclea una letra
+        inputBuscador.addEventListener('keyup', (e) => {
+            const textoBusqueda = e.target.value.toLowerCase();
+        // Agarramos todas las filas de la tabla de materiales
+            const filas = document.querySelectorAll('#tabla-body-material tr');
+
+            filas.forEach(fila => {
+            // Convertimos todo el contenido de la fila a minúsculas
+            const contenidoFila = fila.textContent.toLowerCase();
+            
+            // Si la fila contiene lo que se escribió, la mostramos; si no, la ocultamos
+            if (contenidoFila.includes(textoBusqueda)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+    });
     }
 
     iniciarEncabezado();

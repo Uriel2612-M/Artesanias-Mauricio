@@ -19,7 +19,7 @@
             <li><a href="ventas.html">Ventas</a></li>
             <li><a href="clientes.html">Clientes</a></li>
             <li>
-                Inventario
+                <h2>Inventario</h2>
                 <ul>
                     <li><a href="inventario_producto.html">- Producto</a></li>
                     <li><a href="inventario_material.html">- Material</a></li>
@@ -74,12 +74,15 @@
                     <hr style="margin: 20px 0; border: 0; border-top: 2px solid var(--color-primario);">
                     <H3>Seleccionar Materiales</H3>
                     <br>
-                    <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px;">
-                        <div class="input-group" style="flex: 2; margin-bottom: 0;">
-                        <label for="material-select">Material:</label>
-                        <select type="select" id="material-select" placeholder="Ej. vidrio"></select>
+                    
+                    <div class="input-group">
+                        <label for="material-nombre">Materiales:</label>
+                        <input type="text" id="material-nombre" list="lista-materiales" placeholder="Escribe o selecciona...">
+                        <datalist id="lista-materiales">
+                        </datalist>
                     </div>
-                    <div class="input-group" style="flex: 1; margin-bottom: 0;">
+
+                    <div class="input-group">
                         <label for="material-cantidad">Cantidad:</label>
                         <input type="number" id="material-cantidad">
                     </div>
@@ -95,9 +98,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="padding: 10px;">madera</td>
-                        <td style="padding: 10px;">3</td>
-                        <td style="padding: 10px;">
+                            <td style="padding: 10px;">
                             <button type="button" style="background: red; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Quitar</button>
                         </td>
                     </tr>
@@ -115,7 +116,7 @@
             <section class="barra-busqueda">
                 <form class="barra-busqueda">
                 <input type="text" placeholder="Buscar por nombre...">
-                <button type="submit" class="btn-secundario">Buscar</button>
+                <div type="submit" class="btn-secundario">Buscar</div>
                 </form>
             </section>
 
@@ -127,7 +128,7 @@
                         <th>Unidad</th>
                         <th>Precio</th>
                         <th>Stock</th>
-                        <th>Acciones</th>
+                        <th class="solo-admin">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-producto-body"></tbody>
@@ -163,9 +164,8 @@
             <div class="modal-acciones">
                 <button type="submit">Guardar Cambios</button>
                 <button type="button" id="btn-cerrar-edit">Cancelar</button>
-                <button type="button" id="btn-eliminar-registro" style="background-color: #ff5f5f; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-right: 10px;">
-                    <i class="fas fa-trash-alt"></i> Eliminar
-                </button>
+                <button type="button" id="btn-eliminar-registro" style="background: red;">Eliminar Producto</button>
+    
             </div>
         </form>
     </dialog>

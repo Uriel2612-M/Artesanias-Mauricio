@@ -302,7 +302,7 @@ dialog p strong {
 }
 
 .modal-acciones button[type="button"] {
-    background-color: #e74c3c; 
+    background-color: #ec3a26d2; 
     color: var(--color-blanco);
 }
 
@@ -521,7 +521,7 @@ dialog p strong {
     }
 
     tr {
-        background: #1a1a1a;
+        background: #eeeeee;
         border: 1px solid #333;
         border-radius: 15px;
         margin-bottom: 20px;
@@ -547,5 +547,27 @@ dialog p strong {
         text-align: left;
         font-weight: bold;
         color: #5425ef;
+    }
+    /* Para que los botones se centren bonito en el celular */
+    td[data-label="Acciones"] {
+        text-align: center;
+        padding-left: 15px; /* Le quitamos el padding del 50% solo a esta celda */
+    }
+    
+    td[data-label="Acciones"]::before {
+        display: none; /* Escondemos la palabra "Acciones" para que solo se vean los botones centrados */
+    }
+    td[data-label="Acciones"] {
+        padding-left: 10px !important; /* Le quitamos el empujón del 50% */
+        text-align: center !important; /* Centramos los botones */
+        display: flex !important; 
+        justify-content: center !important; /* Acomoda los botones en medio */
+        gap: 10px; /* Le da un respirito entre el botón de editar y eliminar */
+        white-space: normal !important; /* Evita que se salgan de la pantalla */
+        margin-top: 15px; /* Los separa de los datos de arriba */
+    }
+    
+    td[data-label="Acciones"]::before {
+        content: none !important; /* Escondemos la palabra "Acciones" para que se vea más limpio */
     }
 }

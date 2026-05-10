@@ -41,12 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
             data.forEach(p => {
                 cuerpo.innerHTML += `
                     <tr>
-                        <td>${p.id_producto}</td>
-                        <td>${p.nombre}</td>
-                        <td>${p.unidad || p.unidad_medida || ''}</td>
-                        <td>$${p.precio}</td>
-                        <td>${p.stock}</td>
-                        <td>
+                        <td data-label="ID">${p.id_producto}</td>
+                        <td data-label="Nombre">${p.nombre}</td>
+                        <td data-label="Unidad">${p.unidad || p.unidad_medida || ''}</td>
+                        <td data-label="Precio">$${p.precio}</td>
+                        <td data-label="Stock">${p.stock}</td>
+                        <td data-label="Acciones" class="solo-admin">
                             <button class="btn-editar" onclick="prepararEdicion(${p.id_producto})">Editar</button>
                         </td>
                     </tr>
@@ -58,27 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 3. CARGAR MATERIALES ---
-    async function cargarSelectMateriales() {
-        try {
-            const { data, error } = await supabaseClient
-                .from('material')
-                .select('id_material, nombre, stock');
-            
-            if (error) throw error;
-            listaMaterialesBD = data;
-
-            const select = document.getElementById('material-select');
-            if (select && select.tagName === 'SELECT') {
-                select.innerHTML = '<option value="">-- Elige material --</option>';
-                data.forEach(m => {
-                    select.innerHTML += `<option value="${m.id_material}">${m.nombre} (Stock: ${m.stock})</option>`;
-                });
-            }
-        } catch (err) {
-            console.error("Error al cargar materiales:", err);
-        }
-    }
+    
 
     // --- 4. MANEJO DEL MODAL NUEVO ---
     const modalNuevo = document.getElementById('modal-nueva-artesania');
@@ -99,21 +79,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnMas = document.querySelector('.btn-secundario'); 
     if (btnMas) {
         btnMas.onclick = () => {
-            const select = document.getElementById('material-select');
-            const idMat = select.value;
+                        
+            const inputMaterial = document.getElementById('material-nombre');
+            const nombreEscrito = inputMaterial.value; 
             const cantMat = parseInt(document.getElementById('material-cantidad').value);
 
-            if (idMat && cantMat > 0) {
-                const matInfo = listaMaterialesBD.find(m => m.id_material == idMat);
+            
+            const matInfo = listaMaterialesBD.find(m => m.nombre === nombreEscrito);
+            if (matInfo && cantMat > 0) {
                 materialesParaArtesania.push({
-                    id: idMat,
-                    nombre: matInfo ? matInfo.nombre : 'Material',
+                    id: matInfo.id_material, // Tomamos el ID real de la base de datos
+                    nombre: matInfo.nombre,
                     cant: cantMat
                 });
                 renderizarMaterialesTemp();
+                
+                // Limpiamos las cajas de texto para que pueda agregar otro
+                inputMaterial.value = '';
                 document.getElementById('material-cantidad').value = '';
             } else {
-                alert("Selecciona material y cantidad, apa.");
+                alert("Escribe un material válido de la lista y una cantidad mayor a 0.");
             }
         };
     }
@@ -248,9 +233,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     }
+    const inputBuscador = document.querySelector('.barra-busqueda input'); 
 
+    if (inputBuscador) {
+    
+        inputBuscador.addEventListener('keyup', (e) => {
+            const textoBusqueda = e.target.value.toLowerCase();
+    
+            const filas = document.querySelectorAll('#tabla-producto-body tr');
+
+            filas.forEach(fila => {
+    
+            const contenidoFila = fila.textContent.toLowerCase();
+            
+            // Si la fila contiene lo que se escribió, la mostramos; si no, la ocultamos
+            if (contenidoFila.includes(textoBusqueda)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+    });
+    }
+    async function cargarMaterialesDatalist() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('material')
+            .select('id_material, nombre');
+            
+        if (error) throw error;
+        
+        listaMaterialesBD = data; 
+        const datalist = document.getElementById('lista-materiales');
+        
+        if (datalist) {
+            datalist.innerHTML = '';
+            data.forEach(p => {
+                // Agregamos cada producto como opción sugerida
+                datalist.innerHTML += `<option value="${p.nombre}"></option>`;
+            });
+        }
+    } catch (err) {
+        console.error("Error al cargar productos para autocompletar:", err);
+    }
+}
     iniciarEncabezado();
     cargarProductos();
-    cargarSelectMateriales();
+    cargarMaterialesDatalist();
+    
 });
 

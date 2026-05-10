@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(elFecha) elFecha.textContent = ahora.toLocaleDateString('es-MX');
             if(elHora) elHora.textContent = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
         }, 1000);
+        
     }
 
     // --- 2. MANEJO DEL MODAL ---
@@ -63,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderizarCarrito() {
         const cuerpo = document.getElementById('cuerpo-carrito');
-        if (!cuerpo) return; // Si no hay carrito en la página, se sale sin tronar
+        if (!cuerpo) return; 
         
         cuerpo.innerHTML = '';
         totalVenta = 0;
@@ -134,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. Insertar Detalles
             const detalles = carrito.map(item => ({
                 id_venta: nuevaVenta.id_venta,
-                id_producto: 1, 
+                id_producto: item.id_producto, 
                 cantidad: item.cant,
                 precio_unitario: item.precio
             }));
@@ -167,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 total_venta,
                 monto_pagado,
                 estado_pago,
-                cliente ( id_cliente, nombre, apellidos, telefono ),
+                cliente ( id_cliente, nombre, apellidos),
                 detalle_venta ( cantidad, producto ( nombre ) )
             `);
 
@@ -180,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data.forEach(v => {
                 const nom = v.cliente ? v.cliente.nombre : 'Público';
                 const ape = v.cliente ? v.cliente.apellidos : 'General';
-                const tel = v.cliente ? v.cliente.telefono : '-';
+                
                 const nombresArt = v.detalle_venta?.map(d => `${d.producto?.nombre} (x${d.cantidad})`).join(', ') || 'Sin productos';
                 
                 // LÓGICA DE SEGURIDAD PARA DATOS VIEJOS:
@@ -196,18 +197,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 cuerpoV.innerHTML += `
                     <tr>
-                        <td>
+                        <td data-label="ID/Fecha">
                             <strong>${v.id_venta}</strong><br>
                             <small style="color: #888; font-size: 0.8em;">${fechaFormateada}</small>
                         </td>
                         <td data-label="Cliente">${nom}</td>              
-                        <td>${ape}</td>                    
-                        <td>${nombresArt}</td>        
-                        <td>$${totalReal}</td>        
-                        <td>$${abono}</td>            
-                        <td style="color: ${saldo > 0 ? 'red' : '#a8e42f'}">$${saldo.toFixed(2)}</td> 
-                        <td>${v.estado_pago}</td>
-                        <td> <button class="btn-editar" onclick="abrirEditorVenta('${ventaJSON}')">Editar</button>
+                        <td data-label="Apellidos">${ape}</td>                    
+                        <td data-label="Productos">${nombresArt}</td>        
+                        <td data-label="Total">$${totalReal}</td>        
+                        <td data-label="Abono">$${abono}</td>            
+                        <td data-label="Saldo" style="color: ${saldo > 0 ? 'red' : '#a8e42f'}">$${saldo.toFixed(2)}</td> 
+                        <td data-label="Estado">${v.estado_pago}</td>
+                        <td data-label="Acciones" class="solo-admin"> <button class="btn-editar" onclick="abrirEditorVenta('${ventaJSON}')">Editar</button>
                         </td>
                     </tr>`;
             });
@@ -233,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Cliente
         document.getElementById('edit-nombre').value = v.cliente?.nombre || '';
         document.getElementById('edit-apellidos').value = v.cliente?.apellidos || '';
-        document.getElementById('edit-telefono').value = v.cliente?.telefono || '';
+        
 
         // Dinero 
         document.getElementById('edit-total-venta').value = v.total_venta || v.monto_pagado || 0;
@@ -302,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await supabaseClient.from('cliente').update({
             nombre: document.getElementById('edit-nombre').value,
             apellidos: document.getElementById('edit-apellidos').value,
-            telefono: document.getElementById('edit-telefono').value
+            
         }).eq('id_cliente', idC);
 
         // 2. Actualizar Venta (Dinero y Estado)
@@ -319,31 +320,67 @@ document.addEventListener('DOMContentLoaded', () => {
         alert("Error: " + err.message);
     }
 };
-const btnEliminarP = document.getElementById('btn-eliminar-venta');
-        if (btnEliminarP) {
-            btnEliminarP.onclick = async () => {
+    const btnEliminarVenta = document.getElementById('btn-eliminar-venta');
+
+    if (btnEliminarVenta) {
+        btnEliminarVenta.onclick = async () => {
         
         if (!ventaSeleccionadaId) return;
 
-        const confirmar = confirm("¿Estás seguro de eliminar esta venta? Esta acción no se puede deshacer.");
+        const confirmar = confirm("¿Estás seguro de eliminar esta venta? Las artesanías regresarán al inventario.");
         
         if (confirmar) {
             try {
-                const { error } = await supabaseClient
+                // --- 1. RESCATE DE INVENTARIO (NUEVO) ---
+                const { data: detallesVenta, error: errGet } = await supabaseClient
+                    .from('detalle_venta')
+                    .select('id_producto, cantidad')
+                    .eq('id_venta', ventaSeleccionadaId);
+
+                if (errGet) throw errGet;
+
+                // Si hay productos, los regresamos al stock
+                if (detallesVenta && detallesVenta.length > 0) {
+                    for (const item of detallesVenta) {
+                        // Buscamos el stock actual del producto
+                        const { data: productoActual } = await supabaseClient
+                            .from('producto')
+                            .select('stock')
+                            .eq('id_producto', item.id_producto)
+                            .single();
+
+                        if (productoActual) {
+                            // Sumamos lo que habíamos vendido para regresarlo
+                            const stockRestaurado = productoActual.stock + item.cantidad;
+
+                            // Actualizamos el producto en la BD
+                            await supabaseClient
+                                .from('producto')
+                                .update({ stock: stockRestaurado })
+                                .eq('id_producto', item.id_producto);
+                        }
+                    }
+                }
+
+                // --- 2. BORRADO DE LA VENTA (Mantenemos tu lógica) ---
+                const { error: errDelete } = await supabaseClient
                     .from('venta') 
                     .delete()
                     .eq('id_venta', ventaSeleccionadaId);
 
-                if (error) throw error;
+                    if (errDelete) throw errDelete;
 
-                alert("¡Venta eliminada del inventario!");
-                location.reload(); 
-            } catch (err) {
-                alert("Error al eliminar: " + err.message);
+                    alert("¡Venta eliminada y artesanías devueltas al inventario con éxito!");
+                    location.reload(); 
+                
+                } catch (err) {
+                    alert("Error al eliminar o restaurar inventario: " + err.message);
+                    console.error(err);
+                }
             }
-        }
-    };
+        };
     }
+    
     async function cargarProductosDatalist() {
     try {
         const { data, error } = await supabaseClient
@@ -352,7 +389,7 @@ const btnEliminarP = document.getElementById('btn-eliminar-venta');
             
         if (error) throw error;
         
-        listaProductosBD = data; // Guardamos para la magia del autocompletado
+        listaProductosBD = data; 
         const datalist = document.getElementById('lista-productos');
         
         if (datalist) {

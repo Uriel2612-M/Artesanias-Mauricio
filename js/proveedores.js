@@ -26,11 +26,11 @@ async function cargarProveedores() {
         proveedores.forEach(prove => {
             const fila = document.createElement('tr');
             fila.innerHTML = `
-                <td>#${prove.id_proveedor}</td>
-                <td>${prove.nombre_proveedor}</td>
-                <td>${prove.telefono || 'Sin teléfono'}</td>
-                <td>${prove.direccion || 'Sin dirección'}</td>
-                <td>
+                <td data-label="ID">#${prove.id_proveedor}</td>
+                <td data-label="Nombre">${prove.nombre_proveedor}</td>
+                <td data-label="Teléfono">${prove.telefono || 'Sin teléfono'}</td>
+                <td data-label="Dirección">${prove.direccion || 'Sin dirección'}</td>
+                <td data-label="Acciones" class="solo-admin">
                     <button class="btn-editar" onclick="prepararEdicion(${prove.id_proveedor})">Editar</button>
                 </td>
             `;
@@ -43,13 +43,12 @@ async function cargarProveedores() {
 }
 
 // =====================================
-// 2. PREPARAR EDICIÓN (ABRIR MODAL)
+// 2. PREPARAR EDICIÓN (ABRIR MODAL DE EDICIÓN)
 // =====================================
-
 window.prepararEdicion = async (id) => {
     proveedoresEditandoId = id;
-    const modal = document.getElementById('modal-proveedor'); 
-    if (modal) modal.showModal();
+    const modalEdit = document.getElementById('modal-edit-proveedor'); 
+    if (modalEdit) modalEdit.showModal();
 
     try {
         const { data: proveedor, error } = await supabaseClient
@@ -57,107 +56,137 @@ window.prepararEdicion = async (id) => {
 
         if (error) throw error;
     
-        document.getElementById('proveedor-nombre').value = proveedor.nombre_proveedor;
-        document.getElementById('proveedor-telefono').value = proveedor.telefono || '';
-        document.getElementById('proveedor-direccion').value = proveedor.direccion || '';
+        // OJO: Usamos IDs diferentes para el modal de edición
+        document.getElementById('edit-proveedor-nombre').value = proveedor.nombre_proveedor;
+        document.getElementById('edit-proveedor-telefono').value = proveedor.telefono || '';
+        document.getElementById('edit-proveedor-direccion').value = proveedor.direccion || '';
     } catch (err) {
         console.error("Error:", err);
     }
 }
 
-// =====================================
-// 3. ARRANCADOR Y BOTÓN DE GUARDAR
-// =====================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Reloj y Rol
-    function iniciarEncabezado() {
-        const nombre = localStorage.getItem('nombreUsuario') || 'Desconocido';
-        const idRol = localStorage.getItem('rolUsuario');
-        const textoRol = idRol === '1' ? 'ADMIN' : 'USUARIO';
-        const elUsuario = document.getElementById('header-usuario');
-        if(elUsuario) elUsuario.textContent = `${nombre.toUpperCase()} (${textoRol})`;
-        setInterval(() => {
-            const elFecha = document.getElementById('header-fecha');
-            const elHora = document.getElementById('header-hora');
-            const ahora = new Date();
-            if(elFecha) elFecha.textContent = ahora.toLocaleDateString('es-MX');
-            if(elHora) elHora.textContent = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
-        }, 1000);
-    }
+    // Reloj y Encabezado
     iniciarEncabezado();
     cargarProveedores();
 
-    const modalProve = document.getElementById('modal-proveedor');
-    const formProve = document.getElementById('form-proveedores');
+    // --- MODAL REGISTRO ---
+    const modalNuevo = document.getElementById('modal-proveedor');
+    const formNuevo = document.getElementById('form-proveedores');
+    const btnAbrirNuevo = document.getElementById('btn-nuevo-proveedor');
+    const btnCancelarNuevo = document.getElementById('btn-cancelar-proveedor');
 
-    // === BOTÓN "REGISTRAR NUEVO" (Limpia el modal para agregar) ===
-    const btnNuevo = document.getElementById('btn-nuevo-proveedor');
-    if (btnNuevo) {
-        btnNuevo.onclick = () => {
-            proveedoresEditandoId = null; // MODO NUEVO
-            formProve.reset();
-            
-            modalProve.showModal();
-        };
-    }
+    if (btnAbrirNuevo) btnAbrirNuevo.onclick = () => modalNuevo.showModal();
+    if (btnCancelarNuevo) btnCancelarNuevo.onclick = () => { modalNuevo.close(); formNuevo.reset(); };
 
-    // === BOTÓN CANCELAR ===
-    const btnCancelar = document.getElementById('btn-cancelar-proveedor');
-    if (btnCancelar) {
-        btnCancelar.onclick = () => {
-            modalProve.close();
-            formProve.reset();
-            proveedoresEditandoId = null;
-        };
-    }
-
-    // === LÓGICA DE GUARDAR (INSERT O UPDATE) ===
-    if (formProve) {
-        formProve.onsubmit = async (e) => {
+    // Lógica de INSERT (Solo Registro)
+    if (formNuevo) {
+        formNuevo.onsubmit = async (e) => {
             e.preventDefault();
-
-            // Obtenemos los valores de los inputs (asegúrate de que los IDs coincidan con tu HTML)
             const nombreVal = document.getElementById('proveedor-nombre').value;
             const direccionVal = document.getElementById('proveedor-direccion').value;
             const telefonoVal = document.getElementById('proveedor-telefono').value;
 
             try {
-                if (proveedoresEditandoId) {
-                    // SI HAY ID -> ACTUALIZAMOS (UPDATE)
-                    const { error } = await supabaseClient
-                        .from('proveedor')
-                        .update({ 
-                            nombre_proveedor: nombreVal, 
-                            direccion: direccionVal, 
-                            telefono: telefonoVal 
-                        })
-                        .eq('id_proveedor', proveedoresEditandoId);
-                    
-                    if (error) throw error;
-                    alert('¡Proveedor actualizado!');
-                } else {
-                    // NO HAY ID -> INSERTAMOS (INSERT)
-                    const { error } = await supabaseClient
-                        .from('proveedor')
-                        .insert([{ 
-                            nombre_proveedor: nombreVal, 
-                            direccion: direccionVal, 
-                            telefono: telefonoVal 
-                        }]);
-                    
-                    if (error) throw error;
-                    alert('¡Nuevo proveedor registrado!');
-                }
-
-                formProve.reset();
-                modalProve.close();
-                proveedoresEditandoId = null;
-                cargarProveedores(); // Refrescamos la tabla
-
+                const { error } = await supabaseClient
+                    .from('proveedor')
+                    .insert([{ 
+                        nombre_proveedor: nombreVal, 
+                        direccion: direccionVal, 
+                        telefono: telefonoVal 
+                    }]);
+                
+                if (error) throw error;
+                alert('¡Nuevo proveedor registrado!');
+                formNuevo.reset();
+                modalNuevo.close();
+                cargarProveedores();
             } catch (err) {
-                alert("Error al guardar: " + err.message);
-                console.error(err);
+                alert("Error al registrar: " + err.message);
             }
         };
     }
+
+    // --- MODAL EDICIÓN ---
+    const modalEdit = document.getElementById('modal-edit-proveedor');
+    const formEdit = document.getElementById('form-editar-proveedor');
+    const btnCancelarEdit = document.getElementById('btn-cancelar-edit-proveedor');
+
+    if (btnCancelarEdit) btnCancelarEdit.onclick = () => { modalEdit.close(); proveedoresEditandoId = null; };
+
+    // Lógica de UPDATE (Solo Edición)
+    if (formEdit) {
+        formEdit.onsubmit = async (e) => {
+            e.preventDefault();
+            const nombreVal = document.getElementById('edit-proveedor-nombre').value;
+            const direccionVal = document.getElementById('edit-proveedor-direccion').value;
+            const telefonoVal = document.getElementById('edit-proveedor-telefono').value;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('proveedor')
+                    .update({ 
+                        nombre_proveedor: nombreVal, 
+                        direccion: direccionVal, 
+                        telefono: telefonoVal 
+                    })
+                    .eq('id_proveedor', proveedoresEditandoId);
+                
+                if (error) throw error;
+                alert('¡Proveedor actualizado!');
+                modalEdit.close();
+                proveedoresEditandoId = null;
+                cargarProveedores();
+            } catch (err) {
+                alert("Error al actualizar: " + err.message);
+            }
+        };
+    }
+
+    // --- BOTÓN ELIMINAR ---
+    const btnEliminar = document.getElementById('btn-eliminar-proveedor');
+    if (btnEliminar) {
+        btnEliminar.onclick = async () => {
+            if (!proveedoresEditandoId) return;
+            const confirmar = confirm("¿Seguro que quieres borrar a este proveedor?");
+            if (confirmar) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('proveedor') 
+                        .delete()
+                        .eq('id_proveedor', proveedoresEditandoId); 
+                    if (error) throw error;
+                    alert("Proveedor eliminado");
+                    location.reload(); 
+                } catch (err) {
+                    alert("Error: " + err.message);
+                }
+            }
+        };
+    }
+
+    // Buscador (Mantenemos tu lógica pro)
+    const inputBuscador = document.querySelector('.barra-busqueda input'); 
+    if (inputBuscador) {
+        inputBuscador.addEventListener('keyup', (e) => {
+            const texto = e.target.value.toLowerCase();
+            const filas = document.querySelectorAll('#tabla-proveedores-body tr');
+            filas.forEach(f => f.style.display = f.textContent.toLowerCase().includes(texto) ? '' : 'none');
+        });
+    }
 });
+
+function iniciarEncabezado() {
+    const nombre = localStorage.getItem('nombreUsuario') || 'Desconocido';
+    const idRol = localStorage.getItem('rolUsuario');
+    const textoRol = idRol === '1' ? 'ADMIN' : 'USUARIO';
+    const elUsuario = document.getElementById('header-usuario');
+    if(elUsuario) elUsuario.textContent = `${nombre.toUpperCase()} (${textoRol})`;
+    setInterval(() => {
+        const elFecha = document.getElementById('header-fecha');
+        const elHora = document.getElementById('header-hora');
+        const ahora = new Date();
+        if(elFecha) elFecha.textContent = ahora.toLocaleDateString('es-MX');
+        if(elHora) elHora.textContent = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }, 1000);
+}

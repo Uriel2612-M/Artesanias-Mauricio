@@ -1,6 +1,8 @@
-// js/auth.js
-
 document.addEventListener('DOMContentLoaded', () => {
+    
+    // ==========================================
+    // 1. LÓGICA DE LOGIN (Solo aplica si existe el formulario)
+    // ==========================================
     const formLogin = document.getElementById('login-form'); 
     const btnLogin = document.getElementById('btn-login'); 
 
@@ -19,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btnLogin.textContent = 'Verificando en BD...';
 
             try {
-                
                 const { data: usuarioBD, error } = await supabaseClient
                     .from('usuario') 
                     .select('*')
@@ -27,17 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     .eq('password', inputPassword) 
                     .single(); 
 
-                
                 if (error || !usuarioBD) {
                     alert('Usuario o contraseña incorrectos. Intenta de nuevo.');
                     btnLogin.textContent = 'Iniciar Sesión';
                     return;
                 }
 
-                
+                // --- CORRECCIÓN CRÍTICA AQUÍ ---
+                // Agregamos el ID del usuario para que las compras y ventas no truenen
+                localStorage.setItem('idUsuario', usuarioBD.id_usuario); // Asegúrate de que tu columna se llame id_usuario en Supabase
                 localStorage.setItem('rolUsuario', usuarioBD.id_rol);
                 localStorage.setItem('nombreUsuario', usuarioBD.nombre_usuario);
-                
                 
                 window.location.href = 'dashboard.html'; 
 
@@ -48,36 +49,33 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
-document.addEventListener('DOMContentLoaded', () => {
-    const rolActual = localStorage.getItem('rolUsuario');
 
-    console.log("El ID del rol que entró es el:", rolActual);
-    if (rolActual !== '1') { 
-        
-        const elementosProhibidos = document.querySelectorAll('.solo-admin');
-        
-        elementosProhibidos.forEach(elemento => {
-            elemento.style.display = 'none';
-        });
-    }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
+    // ==========================================
+    // 2. LÓGICA DE SEGURIDAD (Protección de rutas y botones)
+    // ==========================================
     const rolActual = localStorage.getItem('rolUsuario');
-    const paginaActual = window.location.pathname;
     
-    if (rolActual !== '1') { 
+    // Si la variable existe (es decir, alguien inició sesión), aplicamos reglas
+    if (rolActual) {
+        const idRolLimpio = String(rolActual).trim(); // Le quitamos espacios fantasma
+        const paginaActual = window.location.pathname;
         
-        const elementosProhibidos = document.querySelectorAll('.solo-admin');
-        elementosProhibidos.forEach(elemento => {
-            elemento.style.display = 'none';
-        });
+        console.log("El ID del rol que entró es el:", idRolLimpio);
 
-        if (paginaActual.includes('compras.html') || 
-            paginaActual.includes('proveedores.html')) {
-            alert("¡Acceso denegado! Área exclusiva de administración.");
-            window.location.href = 'dashboard.html'; 
+        // Si NO es Administrador (Rol 1)
+        if (idRolLimpio !== '1') { 
+            
+            // A) Esconder botones
+            const elementosProhibidos = document.querySelectorAll('.solo-admin');
+            elementosProhibidos.forEach(elemento => {
+                elemento.style.display = 'none';
+            });
+
+            // B) Expulsar de páginas prohibidas
+            if (paginaActual.includes('compras.html') || paginaActual.includes('proveedores.html')) {
+                alert("¡Acceso denegado! Área exclusiva de administración.");
+                window.location.href = 'dashboard.html'; 
+            }
         }
     }
 });

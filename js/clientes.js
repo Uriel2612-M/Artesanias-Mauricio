@@ -1,5 +1,5 @@
 let clienteEditandoId = null;
-let ventasEditandoId = null;
+
 
 // =====================================
 // 1. CARGAR CLIENTES (LEER)
@@ -13,9 +13,11 @@ async function cargarClientes() {
     cuerpoTabla.innerHTML = '<tr><td colspan="5">Cargando datos...</td></tr>';
 
     try {
+        // Hacemos UNA SOLA consulta ya con la línea mágica integrada
         const { data: clientes, error } = await supabaseClient
             .from('cliente')
             .select('*')
+            .eq('Activo', true) // <--- Minúsculas para que no truene el JS
             .order('nombre', { ascending: true });
 
         if (error) throw error;
@@ -23,7 +25,7 @@ async function cargarClientes() {
         cuerpoTabla.innerHTML = '';
 
         if (clientes.length === 0) {
-            cuerpoTabla.innerHTML = '<tr><td colspan="5">No hay clientes registrados.</td></tr>';
+            cuerpoTabla.innerHTML = '<tr><td colspan="5">No hay clientes registrados o todos están inactivos.</td></tr>';
             return;
         }
 
@@ -31,11 +33,11 @@ async function cargarClientes() {
             const fila = document.createElement('tr');
             
             fila.innerHTML = `
-                <td>#${cliente.id_cliente}</td>
-                <td>${cliente.nombre}</td>
-                <td>${cliente.apellidos || ''}</td> 
-                <td>${cliente.telefono || 'Sin teléfono'}</td>
-                <td>
+                <td data-label="ID">#${cliente.id_cliente}</td>
+                <td data-label="Nombre">${cliente.nombre}</td>
+                <td data-label="Apellidos">${cliente.apellidos || ''}</td>
+                <td data-label="Teléfono">${cliente.telefono || 'Sin teléfono'}</td>
+                <td data-label="Acciones" class="solo-admin">
                     <button class="btn-editar" onclick="prepararEdicion(${cliente.id_cliente})">Editar</button>
                 </td>
             `;
@@ -158,8 +160,55 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    
+    const inputBuscador = document.querySelector('.barra-busqueda input'); 
+
+    if (inputBuscador) {
+    // Escuchamos cada vez que Mauricio teclea una letra
+        inputBuscador.addEventListener('keyup', (e) => {
+            const textoBusqueda = e.target.value.toLowerCase();
+        // Agarramos todas las filas de la tabla de clientes
+            const filas = document.querySelectorAll('#tabla-clientes-body tr');
+
+            filas.forEach(fila => {
+            // Convertimos todo el contenido de la fila a minúsculas
+            const contenidoFila = fila.textContent.toLowerCase();
+            
+            // Si la fila contiene lo que se escribió, la mostramos; si no, la ocultamos
+            if (contenidoFila.includes(textoBusqueda)) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+    });
+}
+const btnEliminarCliente = document.getElementById('btn-eliminar-cliente');
+
+if (btnEliminarCliente) {
+    btnEliminarCliente.onclick = async () => {
+        // Usamos la variable global que guarda el ID del cliente seleccionado
+        if (!clienteEditandoId) return;
+
+        const confirmar = confirm("¿Estás seguro de quitar a este cliente de la lista? Sus ventas pasadas se mantendrán en el historial.");
+        
+        if (confirmar) {
+            try {
+                // CAMBIO CLAVE: Cambiamos .delete() por .update()
+                const { error } = await supabaseClient
+                    .from('cliente')
+                    .update({ Activo: false }) 
+                    .eq('id_cliente', clienteE);
+
+                if (error) throw error;
+
+                alert("Cliente removido con éxito.");
+                location.reload(); 
+            } catch (err) {
+                alert("Error al remover cliente: " + err.message);
+            }
+        }
+    };
+}
 });
 
 

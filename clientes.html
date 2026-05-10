@@ -21,7 +21,7 @@
             <li><a href="ventas.html">Ventas</a></li>
             <li><a href="clientes.html">Clientes</a></li>
             <li>
-                Inventario
+                <h2>Inventario</h2>
                 <ul>
                     <li><a href="inventario_producto.html">- Producto</a></li>
                     <li><a href="inventario_material.html">- Material</a></li>
@@ -47,7 +47,7 @@
         <section class="barra-busqueda">
             <form class="barra-busqueda">
             <input type="text" placeholder="Buscar cliente...">
-            <button type="submit" class="btn-secundario">Buscar</button>
+            <div type="submit" class="btn-secundario">Buscar</div>
             </form>
         </section>
 
@@ -59,7 +59,7 @@
                         <th>Nombre cliente</th>
                         <th>Apellido</th>
                         <th>Teléfono</th>                
-                        <th>Acciones</th>
+                        <th class="solo-admin">Acciones</th>
                     </tr>
                 </thead>                
                 <tbody id="tabla-clientes-body">                   
@@ -87,6 +87,7 @@
             <div class="modal-acciones">
             <button type="submit">Guardar Cambios</button>
             <button type="button" id="btn-cancelar-cliente">Cancelar</button>
+            <button type="button" id="btn-eliminar-cliente" class="btn-secundario" style="background: red;" >Eliminar Cliente</button>
         </div>
         </form>
 
