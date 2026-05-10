@@ -65,6 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Si NO es Administrador (Rol 1)
         if (idRolLimpio !== '1') { 
             
+            document.body.classList.add('modo-empleado');
+
             // A) Esconder botones
             const elementosProhibidos = document.querySelectorAll('.solo-admin');
             elementosProhibidos.forEach(elemento => {

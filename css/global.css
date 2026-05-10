@@ -571,3 +571,6 @@ dialog p strong {
         content: none !important; /* Escondemos la palabra "Acciones" para que se vea más limpio */
     }
 }
+body.modo-empleado .solo-admin {
+    display: none !important;
+}
