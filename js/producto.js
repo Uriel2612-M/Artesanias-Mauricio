@@ -155,27 +155,42 @@ document.addEventListener('DOMContentLoaded', () => {
         // ==========================================
         try {
             // Guardamos la artesanía
-            const { error: errP } = await supabaseClient
+            console.log("Materiales que se van a guardar en la receta:", materialesParaArtesania)
+            const { data: productoNuevo, error: errP } = await supabaseClient
                 .from('producto')
-                .insert([{ nombre, unidad: unidad, precio, stock: stockAAgregar }]);
+                .insert([{ nombre, unidad, precio, stock: stockAAgregar }])
+                .select()
+                .single();
             if (errP) throw errP;
 
-            // Descontamos los materiales exactos
+            // 2. Descontamos materiales Y GUARDAMOS LA RECETA
             for (const item of materialesParaArtesania) {
                 const matOriginal = listaMaterialesBD.find(m => m.id_material == item.id);
                 const nuevoStockMat = matOriginal.stock - (item.cant * stockAAgregar);
                 
+                // A) Descontamos el material
                 await supabaseClient
                     .from('material')
                     .update({ stock: nuevoStockMat })
                     .eq('id_material', item.id);
+
+                // B) NUEVO: Guardamos la receta en tu tabla intermedia
+                await supabaseClient
+                    .from('producto_material')
+                    
+                    .insert([{ 
+                        id_producto: productoNuevo.id_producto, 
+                        id_material: item.id, 
+                        cantidad_necesaria: item.cant // Lo que gasta 1 sola pieza
+                    }]);
             }
-            
             alert("¡Artesanía guardada y materiales descontados correctamente!");
             location.reload();
         } catch (err) {
             alert("Error al guardar: " + err.message);
         }
+        
+        
     };
     // --- 7. EDICIÓN (ADJUNTA AL WINDOW) ---
     window.prepararEdicion = async (id) => {
@@ -208,30 +223,92 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // GUARDAR EDICIÓN
-    const formEditar = document.getElementById('form-editar-producto');
-    if (formEditar) {
-        formEditar.onsubmit = async (e) => {
-            e.preventDefault(); 
-            const nombre = document.getElementById('edit-nombre').value;
-            const unidad = document.getElementById('edit-unidad').value;
-            const precio = parseFloat(document.getElementById('edit-precio').value);
-            const stock = parseInt(document.getElementById('edit-stock').value);
+    const formEditar = document.getElementById('form-editar-producto'); 
 
-            try {
-                
-                const { error } = await supabaseClient
-                    .from('producto')
-                    .update({ nombre, unidad, precio, stock })
-                    .eq('id_producto', productoEditandoId); 
+if (formEditar) {
+    formEditar.onsubmit = async (e) => {
+        e.preventDefault(); 
+        
+        // 1. Jalamos los datos que Mauricio haya escrito o modificado
+        const nombre = document.getElementById('edit-nombre').value;
+        const unidad = document.getElementById('edit-unidad').value;
+        const precio = parseFloat(document.getElementById('edit-precio').value);
+        const stockNuevo = parseInt(document.getElementById('edit-stock').value);
 
-                if (error) throw error;
-                alert('¡Producto actualizado!');
-                location.reload();
-            } catch (err) {
-                alert("Error al guardar: " + err.message);
+        try {
+            // 2. Averiguamos cuánto stock había ANTES de que le moviera
+            const { data: prodViejo } = await supabaseClient
+                .from('producto')
+                .select('stock')
+                .eq('id_producto', productoEditandoId)
+                .single();
+            
+            const diferenciaStock = stockNuevo - prodViejo.stock;
+
+            // 3. LA REGLA DE ORO: Solo descontamos material si la diferencia es positiva (+1, +2 piezas)
+            // --- DENTRO DE TU formEditar.onsubmit ---
+
+if (diferenciaStock > 0) {
+    const { data: receta, error: errR } = await supabaseClient
+        .from('producto_material')
+        .select('*')
+        .eq('id_producto', productoEditandoId);
+
+    console.log("1. Receta encontrada para editar:", receta);
+
+    if (receta && receta.length > 0) {
+        for (const ingrediente of receta) {
+            // TRAMPA 1: Ver si el ID del material y la cantidad están llegando
+            console.log("2. Checando ingrediente:", ingrediente);
+            
+            const { data: matActual } = await supabaseClient
+                .from('material')
+                .select('stock')
+                .eq('id_material', ingrediente.id_material)
+                .single();
+
+            // TRAMPA 2: Ver si el stock actual del material existe
+            console.log("3. Stock actual del material en BD:", matActual?.stock);
+            
+            // OJO AQUÍ: Asegúrate que diga 'cantidad_necesaria' exactamente como en tu tabla
+            const cantReceta = ingrediente.cantidad_necesaria; 
+            console.log("4. Cantidad necesaria en receta:", cantReceta);
+
+            const materialGastadoExtra = cantReceta * diferenciaStock;
+            const stockMatCorregido = matActual.stock - materialGastadoExtra;
+
+            console.log("5. Resultado final de la resta:", stockMatCorregido);
+
+            if (isNaN(stockMatCorregido)) {
+                console.error("¡ERROR! El resultado es NaN. Algo arriba falló.");
+                return; // Detenemos todo para que no guarde el NULL
             }
-        };
+
+            await supabaseClient
+                .from('material')
+                .update({ stock: stockMatCorregido })
+                .eq('id_material', ingrediente.id_material);
+        }
     }
+}
+
+            // 4. Finalmente, guardamos los cambios de la artesanía (nombre, precio, nuevo stock)
+            const { error } = await supabaseClient
+                .from('producto')
+                .update({ nombre, unidad, precio, stock: stockNuevo })
+                .eq('id_producto', productoEditandoId); 
+
+            if (error) throw error;
+            
+            alert('¡Producto actualizado correctamente!');
+            location.reload(); // Refrescamos la página para ver los cambios
+
+        } catch (err) {
+            alert("Error al actualizar: " + err.message);
+            console.error(err);
+        }
+    };
+}
     // --- LÓGICA PARA ELIMINAR ARTESANÍA ---
     const btnEliminarP = document.getElementById('btn-eliminar-registro');
         if (btnEliminarP) {
