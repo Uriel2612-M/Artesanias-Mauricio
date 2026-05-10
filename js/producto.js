@@ -229,14 +229,13 @@ if (formEditar) {
     formEditar.onsubmit = async (e) => {
         e.preventDefault(); 
         
-        // 1. Jalamos los datos que Mauricio haya escrito o modificado
         const nombre = document.getElementById('edit-nombre').value;
         const unidad = document.getElementById('edit-unidad').value;
         const precio = parseFloat(document.getElementById('edit-precio').value);
         const stockNuevo = parseInt(document.getElementById('edit-stock').value);
 
         try {
-            // 2. Averiguamos cuánto stock había ANTES de que le moviera
+            // 1. Obtenemos el stock que tiene actualmente en la BD
             const { data: prodViejo } = await supabaseClient
                 .from('producto')
                 .select('stock')
@@ -245,54 +244,51 @@ if (formEditar) {
             
             const diferenciaStock = stockNuevo - prodViejo.stock;
 
-            // 3. LA REGLA DE ORO: Solo descontamos material si la diferencia es positiva (+1, +2 piezas)
-            // --- DENTRO DE TU formEditar.onsubmit ---
+            // 2. VALIDACIÓN DE MATERIALES (Solo si está aumentando el stock)
+            if (diferenciaStock > 0) {
+                // Traemos la receta de la tabla intermedia
+                const { data: receta } = await supabaseClient
+                    .from('producto_material')
+                    .select('*')
+                    .eq('id_producto', productoEditandoId);
 
-if (diferenciaStock > 0) {
-    const { data: receta, error: errR } = await supabaseClient
-        .from('producto_material')
-        .select('*')
-        .eq('id_producto', productoEditandoId);
+                if (receta && receta.length > 0) {
+                    // --- EL CADENERO DE LA EDICIÓN ---
+                    for (const ingrediente of receta) {
+                        const { data: matActual } = await supabaseClient
+                            .from('material')
+                            .select('nombre, stock')
+                            .eq('id_material', ingrediente.id_material)
+                            .single();
 
-    console.log("1. Receta encontrada para editar:", receta);
+                        const materialNecesarioExtra = ingrediente.cantidad_necesaria * diferenciaStock;
 
-    if (receta && receta.length > 0) {
-        for (const ingrediente of receta) {
-            // TRAMPA 1: Ver si el ID del material y la cantidad están llegando
-            console.log("2. Checando ingrediente:", ingrediente);
-            
-            const { data: matActual } = await supabaseClient
-                .from('material')
-                .select('stock')
-                .eq('id_material', ingrediente.id_material)
-                .single();
+                        // Si lo que necesita es más de lo que hay en bodega... ¡ALERTA!
+                        if (matActual.stock < materialNecesarioExtra) {
+                            return alert(`¡No se puede, apa! Para aumentar el stock necesitas ${materialNecesarioExtra} de ${matActual.nombre}, pero solo te quedan ${matActual.stock} en el inventario.`);
+                        }
+                    }
 
-            // TRAMPA 2: Ver si el stock actual del material existe
-            console.log("3. Stock actual del material en BD:", matActual?.stock);
-            
-            // OJO AQUÍ: Asegúrate que diga 'cantidad_necesaria' exactamente como en tu tabla
-            const cantReceta = ingrediente.cantidad_necesaria; 
-            console.log("4. Cantidad necesaria en receta:", cantReceta);
+                    // --- SI PASÓ LA VALIDACIÓN, DESCONTAMOS ---
+                    for (const ingrediente of receta) {
+                        const { data: matActual } = await supabaseClient
+                            .from('material')
+                            .select('stock')
+                            .eq('id_material', ingrediente.id_material)
+                            .single();
 
-            const materialGastadoExtra = cantReceta * diferenciaStock;
-            const stockMatCorregido = matActual.stock - materialGastadoExtra;
+                        const materialGastadoExtra = ingrediente.cantidad_ncesaria * diferenciaStock;
+                        const stockMatCorregido = matActual.stock - materialGastadoExtra;
 
-            console.log("5. Resultado final de la resta:", stockMatCorregido);
-
-            if (isNaN(stockMatCorregido)) {
-                console.error("¡ERROR! El resultado es NaN. Algo arriba falló.");
-                return; // Detenemos todo para que no guarde el NULL
+                        await supabaseClient
+                            .from('material')
+                            .update({ stock: stockMatCorregido })
+                            .eq('id_material', ingrediente.id_material);
+                    }
+                }
             }
 
-            await supabaseClient
-                .from('material')
-                .update({ stock: stockMatCorregido })
-                .eq('id_material', ingrediente.id_material);
-        }
-    }
-}
-
-            // 4. Finalmente, guardamos los cambios de la artesanía (nombre, precio, nuevo stock)
+            // 3. ACTUALIZACIÓN FINAL DE LA ARTESANÍA
             const { error } = await supabaseClient
                 .from('producto')
                 .update({ nombre, unidad, precio, stock: stockNuevo })
@@ -300,8 +296,8 @@ if (diferenciaStock > 0) {
 
             if (error) throw error;
             
-            alert('¡Producto actualizado correctamente!');
-            location.reload(); // Refrescamos la página para ver los cambios
+            alert('¡Producto actualizado y materiales descontados correctamente!');
+            location.reload();
 
         } catch (err) {
             alert("Error al actualizar: " + err.message);
