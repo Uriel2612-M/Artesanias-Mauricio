@@ -132,26 +132,51 @@ document.addEventListener('DOMContentLoaded', () => {
         const precio = parseFloat(document.getElementById('artesania-precio').value);
         const stockAAgregar = parseInt(document.getElementById('artesania-cantidad').value);
 
+        // ==========================================
+        // 1. EL CADENERO: Validar stock ANTES de insertar
+        // ==========================================
+        for (const item of materialesParaArtesania) {
+            const matOriginal = listaMaterialesBD.find(m => m.id_material == item.id);
+            
+            if (!matOriginal) {
+                return alert(`Error: El material ${item.nombre} no se encontró en la base de datos.`);
+            }
+
+            const totalNecesario = item.cant * stockAAgregar; // Lo que gasta 1 pieza * las piezas que hará
+            
+            if (matOriginal.stock < totalNecesario) {
+                // Si no le alcanza, abortamos la misión y le avisamos a Mauricio
+                return alert( `No hay suficiente ${item.nombre}. Tienes ${matOriginal.stock} y necesitas ${totalNecesario} para fabricar esto.`);
+            }
+        }
+
+        // ==========================================
+        // 2. SI PASA LA PRUEBA, AHORA SÍ GUARDAMOS TODO
+        // ==========================================
         try {
+            // Guardamos la artesanía
             const { error: errP } = await supabaseClient
                 .from('producto')
                 .insert([{ nombre, unidad: unidad, precio, stock: stockAAgregar }]);
             if (errP) throw errP;
 
+            // Descontamos los materiales exactos
             for (const item of materialesParaArtesania) {
                 const matOriginal = listaMaterialesBD.find(m => m.id_material == item.id);
-                if (matOriginal) {
-                    const nuevoStockMat = matOriginal.stock - (item.cant * stockAAgregar);
-                    await supabaseClient.from('material').update({ stock: nuevoStockMat }).eq('id_material', item.id);
-                }
+                const nuevoStockMat = matOriginal.stock - (item.cant * stockAAgregar);
+                
+                await supabaseClient
+                    .from('material')
+                    .update({ stock: nuevoStockMat })
+                    .eq('id_material', item.id);
             }
-            alert("¡Artesanía guardada!");
+            
+            alert("¡Artesanía guardada y materiales descontados correctamente!");
             location.reload();
         } catch (err) {
-            alert("Error: " + err.message);
+            alert("Error al guardar: " + err.message);
         }
     };
-
     // --- 7. EDICIÓN (ADJUNTA AL WINDOW) ---
     window.prepararEdicion = async (id) => {
         productoEditandoId = id;
@@ -259,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         const { data, error } = await supabaseClient
             .from('material')
-            .select('id_material, nombre');
+            .select('id_material, nombre, stock');
             
         if (error) throw error;
         
@@ -269,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (datalist) {
             datalist.innerHTML = '';
             data.forEach(p => {
-                // Agregamos cada producto como opción sugerida
+
                 datalist.innerHTML += `<option value="${p.nombre}"></option>`;
             });
         }
