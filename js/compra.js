@@ -38,10 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     proveedor (nombre_proveedor),
                     detalle_compra (
                         cantidad,
+                        precio_unitario,
                         material ( nombre )
                     )
+                    
                 `)
-                .order('fecha', { ascending: false });
+                .order('id_compra', { ascending: true });
 
             if (error) throw error;
             cuerpo.innerHTML = '';
@@ -57,6 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td data-label="Fecha">${new Date(c.fecha).toLocaleDateString()}</td>
                         <td data-label="Proveedor">${c.proveedor ? c.proveedor.nombre_proveedor : 'N/A'}</td>
                         <td data-label="Materiales">${nombresMateriales}</td>
+                        <td data-label="Cantidad"><strong>${c.detalle_compra ? c.detalle_compra.reduce((sum, d) => sum + d.cantidad, 0) : 0}</strong></td>
+                        <td data-label="Precio Unitario"><strong>$${c.detalle_compra && c.detalle_compra[0]?.precio_unitario ? c.detalle_compra[0].precio_unitario.toFixed(2) : '0.00'}</strong></td>
                         <td data-label="Total"><strong>$${c.total.toFixed(2)}</strong></td>
                         <td data-label="Acciones">
                             <button class="btn-eliminar-compra" onclick="eliminarCompra(${c.id_compra})" style="background: red; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Eliminar</button>
@@ -139,6 +143,7 @@ window.eliminarCompra = async (idCompra) => {
         e.preventDefault();
         const textoProveedor = document.getElementById('proveedor-nombre').value;
         const textoMaterial = document.getElementById('material-nombre').value;
+        const precioUnitario = parseFloat(document.getElementById('compra-precio-unitario').value);
         const cantidad = parseInt(document.getElementById('compra-cantidad').value);
         const total = parseFloat(document.getElementById('total-compra').value);
 
@@ -180,13 +185,12 @@ window.eliminarCompra = async (idCompra) => {
                         id_compra: nuevaCompra.id_compra,
                         id_material: idMatReal,
                         cantidad: cantidad,
-                        precio_unitario: (total / cantidad) 
+                        precio_unitario: precioUnitario
                     }]);
 
                 if (errD) throw errD;
 
-                // C. MAGIA: ACTUALIZAR STOCK (SUMAR)
-                // Primero traemos el stock actual para no regarla
+                // C. MAGIA: ACTUALIZAR STOCK
                 const { data: materialActual } = await supabaseClient
                     .from('material')
                     .select('stock')
@@ -197,7 +201,7 @@ window.eliminarCompra = async (idCompra) => {
 
                 const { error: errStock } = await supabaseClient
                     .from('material')
-                    .update({ stock: nuevoStock })
+                    .update({ stock: nuevoStock, costo_unitario: precioUnitario }) 
                     .eq('id_material', idMatReal);
 
                 if (errStock) throw errStock;

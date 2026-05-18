@@ -49,24 +49,34 @@
             <h2>Inventario - Material</h2>
             
                 <section class="controles-superiores">
-                    <button id="btn-nuevo-material" class="btn-principal">Registrar nuevo material</button>
+                    <button id="btn-nuevo-material" class="btn-principal solo-admin">Registrar nuevo material</button>
 
                     <dialog id="modal-nuevo-material">
                         <h2>Agregar nuevo material</h2>
                         <form id="form-nuevo-material">
                             <div class="input-group">
-                                <label for="material-nombre">Nombre:</label>
+                                <label for="material-nombre">Nombre del material*:</label>
                                 <input type="text" id="material-nombre" placeholder="Ej. Lamina" required>
                             </div>
-            
+                            
                             <div class="input-group">
-                                <label for="material-unidad">Unidad:</label>
+                                <label for="precio-unitario">Precio Unitario*:</label>
+                                <input type="number" id="precio-unitario" step="0.01" placeholder="0.00" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="material-unidad">Unidad*:</label>
                                 <input type="text" id="material-unidad" placeholder="piezas" required>
                             </div>
 
                             <div class="input-group">
-                                <label for="material-cantidad">Cantidad (Stock):</label>
+                                <label for="material-cantidad">Cantidad (Stock)*:</label>
                                 <input type="number" id="material-cantidad" placeholder="1" required>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Fecha de Caducidad (Opcional):</label>
+                                <input type="date" id="mat-caducidad">
                             </div>
 
                             <div class="modal-acciones">
@@ -89,8 +99,10 @@
                     <tr>
                         <th>Id</th>
                         <th>Nombre Material</th>
+                        <th class="solo-admin">Precio Unitario</th>
                         <th>Unidad</th>
                         <th>Stock</th>
+                        <th>Caducidad</th>
                         <th class="solo-admin">Acciones</th>
                     </tr>
                 </thead>
@@ -109,6 +121,11 @@
             </div>
 
             <div class="input-group">
+                <label for="edit-precio">Precio Unitario:</label>
+                <input type="number" id="edit-precio" step="0.01" placeholder="0.00" required>
+            </div>
+
+            <div class="input-group">
                 <label>Unidad:</label>
                 <input type="text" id="edit-unidad" placeholder="Unidad" required>
             </div>
@@ -116,6 +133,11 @@
             <div class="input-group">
                 <label>Stock:</label>
                 <input type="text" id="edit-stock" placeholder="stock" required>
+            </div>
+
+            <div class="input-group">
+                <label>Fecha de Caducidad (Opcional):</label>
+                <input type="date" id="edit-caducidad">
             </div>
 
             <div class="modal-acciones">

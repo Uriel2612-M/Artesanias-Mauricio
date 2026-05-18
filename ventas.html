@@ -46,39 +46,38 @@
     <button id="btn-nueva-venta" class="btn-principal">Registrar nueva venta</button>
     <section class="controles-superiores">
         
-        <section class="barra-busqueda">
-            <form class="barra-busqueda">
-            <input type="text" placeholder="Buscar venta...">
-            <div type="submit" class="btn-secundario">Buscar</div>
-            </form>
-        </section>
-        
         <dialog id="modal-venta">
+            <h2>Registrar nueva venta</h2>
             <form id="form-venta">
-                <h2>Registrar nueva venta</h2>
+                
                 
                 <div class="input-group">
-                    <label>Nombre:</label> <input type="text" id="v-nombre">
+                    <label>Nombre del cliente*:</label> <input type="text" id="v-nombre">
                 </div>
                 <div class="input-group">
-                    <label>Apellidos:</label> <input type="text" id="v-apellidos">
+                    <label>Apellido Paterno*:</label> <input type="text" id="v-apellido-paterno" required>
                 </div>
+
+                <div class="input-group">
+                    <label>Apellido Materno*:</label> <input type="text" id="v-apellido-materno" required>
+                </div>
+
                 <div class="input-group">
                     <label>Teléfono:</label> <input type="text" id="v-telefono">
                 </div>
                 <div class="input-group">
-                    <label>Fecha de venta:</label> <input type="date" id="v-fecha-entrega">
+                    <label>Fecha de venta*:</label> <input type="date" id="v-fecha-entrega" required>
                 </div>
 
                 <div class="input-group">
-                    <label for="v-artesania-nombre">Artesanía:</label>
+                    <label for="v-artesania-nombre">Artesanía comprada*:</label>
                     <input type="text" id="v-artesania-nombre" list="lista-productos" placeholder="Escribe o selecciona...">
                     <datalist id="lista-productos">
                     </datalist>
                 </div>
                 
                 <div class="input-group">
-                    <label>Cantidad:</label> 
+                    <label>Cantidad*:</label> 
                     <input type="number" id="v-cantidad" value="1">
                     <button type="button" id="btn-agregar-item">+</button>
                 </div>
@@ -114,13 +113,20 @@
                     <label>Saldo Pendiente ($):</label>
                     <input type="number" id="v-saldo-restante" readonly style="color: red; font-weight: bold;">
                 </div>
-                <div class="input-group">
-                <label for="v-estado-pago">Estado de Pago:</label>
-                <select id="v-estado-pago">
-                    <option value="Pagado">Pagado</option>
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Anticipo">Anticipo</option>
+                
+            <div class="input-group">
+                <label>Estado de Pago:</label>
+                <select id="v-estado-pago" required>
+                <option value="Pagado">Pagado</option>
+                <option value="Anticipo">Anticipo</option>
+                <option value="Debe">Debe</option>
                 </select>
+
+                <div id="contenedor-fecha-limite" style="display: none; margin-top: 10px;">
+                    <label id="etiqueta-fecha-limite">Fecha límite de pago:</label>
+                    <input type="date" id="v-fecha-limite">
+                </div>
+            </div>
                 </div>
                 <div class="modal-acciones">
                     <button type="button" id="btn-cancelar-venta">Cancelar</button>
@@ -130,6 +136,12 @@
             
         </dialog>
     </section>
+<section class="barra-busqueda">
+            <form class="barra-busqueda">
+            <input type="text" placeholder="Buscar venta...">
+            <div type="submit" class="btn-secundario">Buscar</div>
+            </form>
+        </section>
 
     <section>
         <table border="1" style="width: 100%;">
@@ -137,7 +149,8 @@
                 <tr>
                     <th>ID</th>
                     <th>Nombre cliente</th>
-                    <th>Apellidos</th>
+                    <th>Apellido Paterno</th>
+                    <th>Apellido Materno</th>
                     <th>Artesanía Comprada</th>
                     <th>Total de compra</th>
                     <th>Abonado</th>
@@ -163,8 +176,13 @@
         </div>
 
         <div class="input-group">
-            <label>Apellidos:</label>
-            <input type="text" id="edit-apellidos" placeholder="Apellidos">
+            <label>Apellido Paterno:</label>
+            <input type="text" id="edit-apellidos" placeholder="Apellido Paterno">
+        </div>
+
+        <div class="input-group">
+            <label>Apellido Materno:</label>
+            <input type="text" id="edit-apellido-materno" placeholder="Apellido Materno">
         </div>
         
         <label>Total de la Venta ($):</label>

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     const formLogin = document.getElementById('login-form'); 
     const btnLogin = document.getElementById('btn-login'); 
+    
 
     if (formLogin) {
         formLogin.addEventListener('submit', async (e) => {
@@ -12,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             const inputUsuario = document.getElementById('login-usuario').value;
             const inputPassword = document.getElementById('login-password').value;
+            const rolSeleccionado = document.getElementById('login-rol').value;
 
             if (inputUsuario === '' || inputPassword === '') {
                 alert('Por favor, llena todos los campos.');
@@ -25,11 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     .from('usuario') 
                     .select('*')
                     .eq('nombre_usuario', inputUsuario) 
+                    .eq('id_rol', rolSeleccionado)
                     .eq('password', inputPassword) 
                     .single(); 
 
                 if (error || !usuarioBD) {
-                    alert('Usuario o contraseña incorrectos. Intenta de nuevo.');
+                    alert('Usuario, contraseña o rol incorrectos. Intenta de nuevo.');
                     btnLogin.textContent = 'Iniciar Sesión';
                     return;
                 }

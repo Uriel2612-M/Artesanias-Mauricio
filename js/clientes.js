@@ -35,7 +35,8 @@ async function cargarClientes() {
             fila.innerHTML = `
                 <td data-label="ID">#${cliente.id_cliente}</td>
                 <td data-label="Nombre">${cliente.nombre}</td>
-                <td data-label="Apellidos">${cliente.apellidos || ''}</td>
+                <td data-label="Apellido Paterno">${cliente.apellido_pat || ''}</td>
+                <td data-label="Apellido Materno">${cliente.apellido_mat || ''}</td>
                 <td data-label="Teléfono">${cliente.telefono || 'Sin teléfono'}</td>
                 <td data-label="Acciones" class="solo-admin">
                     <button class="btn-editar" onclick="prepararEdicion(${cliente.id_cliente})">Editar</button>
@@ -70,7 +71,8 @@ async function prepararEdicion(id) {
         if (error) throw error;
     
         document.getElementById('cliente-nombre').value = cliente.nombre;
-        document.getElementById('cliente-apellidos').value = cliente.apellidos || '';
+        document.getElementById('cliente-apellido_pat').value = cliente.apellido_pat || '';
+        document.getElementById('cliente-apellido_mat').value = cliente.apellido_mat || '';
         document.getElementById('cliente-telefono').value = cliente.telefono || '';
 
     } catch (err) {
@@ -123,7 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault(); 
             
             const nombre = document.getElementById('cliente-nombre').value;
-            const apellidos = document.getElementById('cliente-apellidos').value;
+            const apellido_pat = document.getElementById('cliente-apellido_pat').value;
+            const apellido_mat = document.getElementById('cliente-apellido_mat').value;
             const telefono = document.getElementById('cliente-telefono').value;
 
             try {
@@ -131,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const { error } = await supabaseClient
                         .from('cliente')
-                        .update({ nombre: nombre, apellidos: apellidos, telefono: telefono })
+                        .update({ nombre: nombre, apellido_pat: apellido_pat, apellido_mat: apellido_mat, telefono: telefono })
                         .eq('id_cliente', clienteEditandoId); 
 
                     if (error) throw error;
@@ -141,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const { error } = await supabaseClient
                         .from('cliente')
-                        .insert([{ nombre: nombre, apellidos: apellidos, telefono: telefono }]);
+                        .insert([{ nombre: nombre, apellido_pat: apellido_pat, apellido_mat: apellido_mat, telefono: telefono }]);
 
                     if (error) throw error;
                     alert('¡Cliente nuevo registrado!');
@@ -197,7 +200,7 @@ if (btnEliminarCliente) {
                 const { error } = await supabaseClient
                     .from('cliente')
                     .update({ Activo: false }) 
-                    .eq('id_cliente', clienteE);
+                    .eq('id_cliente', clienteEditandoId);
 
                 if (error) throw error;
 

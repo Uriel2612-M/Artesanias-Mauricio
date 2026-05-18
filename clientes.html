@@ -57,7 +57,8 @@
                     <tr>
                         <th>ID</th>
                         <th>Nombre cliente</th>
-                        <th>Apellido</th>
+                        <th>Apellido Paterno</th>
+                        <th>Apellido Materno</th>
                         <th>Teléfono</th>                
                         <th class="solo-admin">Acciones</th>
                     </tr>
@@ -75,8 +76,13 @@
             </div>
 
             <div class="input-group">
-                <label for="cliente-apellidos">Apellidos:</label>
-                <input type="text" id="cliente-apellidos" required>
+                <label for="cliente-apellido_pat">Apellido Paterno:</label>
+                <input type="text" id="cliente-apellido_pat" required>
+            </div>
+
+            <div class="input-group">
+                <label for="cliente-apellido_mat">Apellido Materno:</label>
+                <input type="text" id="cliente-apellido_mat" required>
             </div>
 
             <div class="input-group">

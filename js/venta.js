@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if(elFecha) elFecha.textContent = ahora.toLocaleDateString('es-MX');
             if(elHora) elHora.textContent = ahora.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: true });
         }, 1000);
-        
     }
 
     // --- 2. MANEJO DEL MODAL ---
@@ -30,10 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnNuevaVenta) btnNuevaVenta.onclick = () => modal.showModal();
     
     document.getElementById('btn-cancelar-venta').onclick = () => {
-        modal.close();
-        carrito = [];
-        renderizarCarrito();
-    };
+    document.getElementById('form-venta').reset(); 
+    carrito = [];
+    renderizarCarrito();
+    modal.close();
+};
 
     // --- 3. CARRITO TEMPORAL ---
     document.getElementById('btn-agregar-item').onclick = () => {
@@ -54,7 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             document.getElementById('v-artesania-nombre').value = '';
             document.getElementById('v-cantidad').value = '1';
-            document.getElementById('v-precio-unitario').value = '';
+            
+            // MODIFICADO: Al limpiar el input de precio, le regresamos la edición libre temporalmente
+            const inputPrecio = document.getElementById('v-precio-unitario');
+            inputPrecio.value = '';
+            inputPrecio.readOnly = false; 
             
             renderizarCarrito();
         } else {
@@ -80,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </tr>`;
         });
         
-        // --- ACTUALIZAR TOTALES CON SEGURO ---
         const elTotalLabel = document.getElementById('total-pre-venta');
         if (elTotalLabel) elTotalLabel.textContent = totalVenta;
         
@@ -91,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-
     window.quitarItem = (index) => {
         carrito.splice(index, 1);
         renderizarCarrito();
@@ -107,12 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
         btnGuardar.textContent = 'Guardando...';
 
         try {
-            // 1. Insertar Cliente
+            // 1. Insertar Cliente 
+            // MODIFICADO: Ahora jala de forma separada v-apellido-paterno y v-apellido-materno
             const { data: nuevoCliente, error: errCliente } = await supabaseClient
                 .from('cliente')
                 .insert([{
                     nombre: document.getElementById('v-nombre').value,
-                    apellidos: document.getElementById('v-apellidos').value,
+                    apellido_pat: document.getElementById('v-apellido-paterno').value,
+                    apellido_mat: document.getElementById('v-apellido-materno').value
                 }])
                 .select().single();
 
@@ -126,7 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     total_venta: totalVenta, 
                     monto_pagado: parseFloat(document.getElementById('v-abono').value) || 0, 
                     fecha: document.getElementById('v-fecha-entrega').value || new Date().toISOString().split('T')[0],
-                    estado_pago: document.getElementById('v-estado-pago').value
+                    estado_pago: document.getElementById('v-estado-pago').value,
+                    fecha_limite: document.getElementById('v-fecha-limite').value || null
                 }])
                 .select().single();
 
@@ -159,92 +164,112 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 5. CARGAR HISTORIAL ---
     async function cargarVentas() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('venta')
-            .select(`
-                id_venta,
-                fecha,
-                total_venta,
-                monto_pagado,
-                estado_pago,
-                cliente ( id_cliente, nombre, apellidos),
-                detalle_venta ( cantidad, producto ( nombre ) )
-            `);
+        try {
+            const { data, error } = await supabaseClient
+                .from('venta')
+                .select(`
+                    id_venta,
+                    fecha,
+                    total_venta,
+                    monto_pagado,
+                    estado_pago,
+                    fecha_limite,
+                    cliente ( id_cliente, nombre, apellido_pat, apellido_mat),
+                    detalle_venta ( cantidad, producto ( nombre ) )
+                `);
 
-        if (error) throw error;
+            if (error) throw error;
 
-        const cuerpoV = document.getElementById('cuerpo-ventas');
-        cuerpoV.innerHTML = '';
+            const cuerpoV = document.getElementById('cuerpo-ventas');
+            cuerpoV.innerHTML = '';
 
-        if (data) {
-            data.forEach(v => {
-                const nom = v.cliente ? v.cliente.nombre : 'Público';
-                const ape = v.cliente ? v.cliente.apellidos : 'General';
+            if (data) {
+                data.sort((a, b) => {
+                    // 1. Le asignamos una "prioridad" (1 es más urgente que 2)
+                    const prioridadA = (a.estado_pago === 'Debe' || a.estado_pago === 'Anticipo') ? 1 : 2;
+                    const prioridadB = (b.estado_pago === 'Debe' || b.estado_pago === 'Anticipo') ? 1 : 2;
+
+                    // 2. Si A es más urgente que B, lo empuja para arriba
+                    if (prioridadA < prioridadB) return -1;
+                    if (prioridadA > prioridadB) return 1;
+
+                    // 3. Si tienen la misma prioridad (los dos deben o los dos ya pagaron),
+                    // los ordenamos por ID de mayor a menor (los más nuevos hasta arriba)
+                    return b.id_venta - a.id_venta;
+                });
+                data.forEach(v => {
+                    const nom = v.cliente ? v.cliente.nombre : 'Público';
+                    const ape = v.cliente ? v.cliente.apellido_pat : 'General';
+                    const apeMat = v.cliente ? v.cliente.apellido_mat : 'N/A';
+
+                    const nombresArt = v.detalle_venta?.map(d => `${d.producto?.nombre} (x${d.cantidad})`).join(', ') || 'Sin productos';
+                    
+                    const totalReal = v.total_venta || v.monto_pagado || 0;
+                    const abono = v.monto_pagado || 0;
+                    const saldo = totalReal - abono;
+                    
+                    const ventaJSON = JSON.stringify(v).replace(/"/g, '&quot;');
+                    let fechaFormateada = 'Sin fecha';
+                    if (v.fecha) {
+                        fechaFormateada = new Date(v.fecha + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+                    }
+                    
+                    let diseñoEstado = `<strong>${v.estado_pago}</strong>`;
                 
-                const nombresArt = v.detalle_venta?.map(d => `${d.producto?.nombre} (x${d.cantidad})`).join(', ') || 'Sin productos';
-                
-                // LÓGICA DE SEGURIDAD PARA DATOS VIEJOS:
-                const totalReal = v.total_venta || v.monto_pagado || 0;
-                const abono = v.monto_pagado || 0;
-                const saldo = totalReal - abono;
-                
-                const ventaJSON = JSON.stringify(v).replace(/"/g, '&quot;');
-                let fechaFormateada = 'Sin fecha';
-                if (v.fecha) {
-                fechaFormateada = new Date(v.fecha + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
-                }
-                
-                cuerpoV.innerHTML += `
-                    <tr>
-                        <td data-label="ID/Fecha">
-                            <strong>${v.id_venta}</strong><br>
-                            <small style="color: #888; font-size: 0.8em;">${fechaFormateada}</small>
-                        </td>
-                        <td data-label="Cliente">${nom}</td>              
-                        <td data-label="Apellidos">${ape}</td>                    
-                        <td data-label="Productos">${nombresArt}</td>        
-                        <td data-label="Total">$${totalReal}</td>        
-                        <td data-label="Abono">$${abono}</td>            
-                        <td data-label="Saldo" style="color: ${saldo > 0 ? 'red' : '#a8e42f'}">$${saldo.toFixed(2)}</td> 
-                        <td data-label="Estado">${v.estado_pago}</td>
-                        <td data-label="Acciones" class="solo-admin"> <button class="btn-editar" onclick="abrirEditorVenta('${ventaJSON}')">Editar</button>
-                        </td>
-                    </tr>`;
-            });
+                    // Si debe o es anticipo, Y además hay una fecha límite guardada
+                    if ((v.estado_pago === 'Debe' || v.estado_pago === 'Anticipo') && v.fecha_limite) {
+                    // Formateamos la fecha límite para que se lea chido
+                        const fechaLim = new Date(v.fecha_limite + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+                    
+                    // Le agregamos el letrerito rojo abajo del estado
+                        diseñoEstado += `<br><small style="color: #d9534f; font-size: 0.8em;">Límite: ${fechaLim}</small>`;
+                    }
+                    cuerpoV.innerHTML += `
+                        <tr>
+                            <td data-label="ID/Fecha">
+                                <strong>${v.id_venta}</strong><br>
+                                <small style="color: #888; font-size: 0.8em;">${fechaFormateada}</small>
+                            </td>
+                            <td data-label="Cliente">${nom}</td>              
+                            <td data-label="Apellido Paterno">${ape}</td>                    
+                            <td data-label="Apellido Materno">${apeMat}</td>        
+                            <td data-label="Productos">${nombresArt}</td>        
+                            <td data-label="Total">$${totalReal}</td>        
+                            <td data-label="Abono">$${abono}</td>            
+                            <td data-label="Saldo" style="color: ${saldo > 0 ? 'red' : '#a8e42f'}">$${saldo.toFixed(2)}</td> 
+                            <td data-label="Estado">${diseñoEstado}</td>
+                            <td data-label="Acciones" class="solo-admin"> <button class="btn-editar" onclick="abrirEditorVenta('${ventaJSON}')">Editar</button>
+                            </td>
+                        </tr>`;
+                });
+            }
+        } catch (err) {
+            console.error("Error:", err);
         }
-    } catch (err) {
-        console.error("Error:", err);
     }
-
-}
-   
 
     // --- 6. EDICIÓN ---
     window.abrirEditorVenta = (datosStr) => {
-    try {
-        const v = JSON.parse(datosStr);
-        ventaSeleccionadaId = v.id_venta;
-        const modalEdit = document.getElementById('modal-editar-venta');
-        
-        // IDs
-        document.getElementById('edit-id-venta').value = v.id_venta;
-        document.getElementById('edit-id-cliente').value = v.cliente?.id_cliente || v.id_cliente;
+        try {
+            const v = JSON.parse(datosStr);
+            ventaSeleccionadaId = v.id_venta;
+            const modalEdit = document.getElementById('modal-editar-venta');
+            
+            document.getElementById('edit-id-venta').value = v.id_venta;
+            document.getElementById('edit-id-cliente').value = v.cliente?.id_cliente || v.id_cliente;
 
-        // Cliente
-        document.getElementById('edit-nombre').value = v.cliente?.nombre || '';
-        document.getElementById('edit-apellidos').value = v.cliente?.apellidos || '';
-        
+            document.getElementById('edit-nombre').value = v.cliente?.nombre || '';
+            document.getElementById('edit-apellidos').value = v.cliente?.apellido_pat || '';
+            document.getElementById('edit-apellido-materno').value = v.cliente?.apellido_mat || '';
 
-        // Dinero 
-        document.getElementById('edit-total-venta').value = v.total_venta || v.monto_pagado || 0;
-        document.getElementById('edit-monto-pagado').value = v.monto_pagado || 0;
-        document.getElementById('edit-estado-pago').value = v.estado_pago || 'Pagado';
+            document.getElementById('edit-total-venta').value = v.total_venta || v.monto_pagado || 0;
+            document.getElementById('edit-monto-pagado').value = v.monto_pagado || 0;
+            document.getElementById('edit-estado-pago').value = v.estado_pago || 'Pagado';
 
-        modalEdit.showModal();
-    } catch (err) {
-        console.error("Error al abrir:", err);
-    }
+            modalEdit.showModal();
+        } catch (err) {
+            console.error("Error al abrir:", err);
+        }
     };
 
     document.getElementById('btn-cerrar-edit').onclick = () => document.getElementById('modal-editar-venta').close();
@@ -260,119 +285,101 @@ document.addEventListener('DOMContentLoaded', () => {
             if (elSaldo) elSaldo.value = restante.toFixed(2);
         });
     }
+
     // === LÓGICA DEL BUSCADOR DE VENTAS ===
     const inputBuscador = document.querySelector('.barra-busqueda input'); 
-
     if (inputBuscador) {
-    // Escuchamos cada vez que Mauricio teclea una letra
         inputBuscador.addEventListener('keyup', (e) => {
             const textoBusqueda = e.target.value.toLowerCase();
-        // Agarramos todas las filas de la tabla de ventas
             const filas = document.querySelectorAll('#cuerpo-ventas tr');
 
             filas.forEach(fila => {
-            // Convertimos todo el contenido de la fila a minúsculas
-            const contenidoFila = fila.textContent.toLowerCase();
-            
-            // Si la fila contiene lo que se escribió, la mostramos; si no, la ocultamos
-            if (contenidoFila.includes(textoBusqueda)) {
-                fila.style.display = '';
-            } else {
-                fila.style.display = 'none';
-            }
+                const contenidoFila = fila.textContent.toLowerCase();
+                if (contenidoFila.includes(textoBusqueda)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
         });
-    });
-}
+    }
 
     iniciarEncabezado();
     cargarVentas();
     cargarProductosDatalist();
 
     document.getElementById('form-editar-venta').onsubmit = async (e) => {
-    e.preventDefault();
-    
-    const idV = document.getElementById('edit-id-venta').value;
-    const idC = document.getElementById('edit-id-cliente').value;
-    
-    // Capturamos los nuevos valores del Modal
-    const nuevoAbono = parseFloat(document.getElementById('edit-monto-pagado').value);
-    const nuevoEstado = document.getElementById('edit-estado-pago').value;
+        e.preventDefault();
+        
+        const idV = document.getElementById('edit-id-venta').value;
+        const idC = document.getElementById('edit-id-cliente').value;
+        
+        const nuevoAbono = parseFloat(document.getElementById('edit-monto-pagado').value);
+        const nuevoEstado = document.getElementById('edit-estado-pago').value;
 
-    try {
-        // 1. Actualizar Cliente
-        await supabaseClient.from('cliente').update({
-            nombre: document.getElementById('edit-nombre').value,
-            apellidos: document.getElementById('edit-apellidos').value,
-            
-        }).eq('id_cliente', idC);
+        try {
+            await supabaseClient.from('cliente').update({
+                nombre: document.getElementById('edit-nombre').value,
+                apellido_pat: document.getElementById('edit-apellidos').value,
+                apellido_mat: document.getElementById('edit-apellido-materno').value
+            }).eq('id_cliente', idC);
 
-        // 2. Actualizar Venta (Dinero y Estado)
-        const { error } = await supabaseClient.from('venta').update({
-            monto_pagado: nuevoAbono,
-            estado_pago: nuevoEstado
-        }).eq('id_venta', idV);
+            const { error } = await supabaseClient.from('venta').update({
+                monto_pagado: nuevoAbono,
+                estado_pago: nuevoEstado
+            }).eq('id_venta', idV);
 
-        if (error) throw error;
+            if (error) throw error;
 
-        alert("¡Venta actualizada! El saldo se recalculó con éxito.");
-        location.reload();
-    } catch (err) {
-        alert("Error: " + err.message);
-    }
-};
+            alert("¡Venta actualizada! El saldo se recalculó con éxito.");
+            location.reload();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
+
     const btnEliminarVenta = document.getElementById('btn-eliminar-venta');
-
     if (btnEliminarVenta) {
         btnEliminarVenta.onclick = async () => {
-        
-        if (!ventaSeleccionadaId) return;
+            if (!ventaSeleccionadaId) return;
 
-        const confirmar = confirm("¿Estás seguro de eliminar esta venta? Las artesanías regresarán al inventario.");
-        
-        if (confirmar) {
-            try {
-                // --- 1. RESCATE DE INVENTARIO (NUEVO) ---
-                const { data: detallesVenta, error: errGet } = await supabaseClient
-                    .from('detalle_venta')
-                    .select('id_producto, cantidad')
-                    .eq('id_venta', ventaSeleccionadaId);
+            const confirmar = confirm("¿Estás seguro de eliminar esta venta? Las artesanías regresarán al inventario.");
+            if (confirmar) {
+                try {
+                    const { data: detallesVenta, error: errGet } = await supabaseClient
+                        .from('detalle_venta')
+                        .select('id_producto, cantidad')
+                        .eq('id_venta', ventaSeleccionadaId);
 
-                if (errGet) throw errGet;
+                    if (errGet) throw errGet;
 
-                // Si hay productos, los regresamos al stock
-                if (detallesVenta && detallesVenta.length > 0) {
-                    for (const item of detallesVenta) {
-                        // Buscamos el stock actual del producto
-                        const { data: productoActual } = await supabaseClient
-                            .from('producto')
-                            .select('stock')
-                            .eq('id_producto', item.id_producto)
-                            .single();
-
-                        if (productoActual) {
-                            // Sumamos lo que habíamos vendido para regresarlo
-                            const stockRestaurado = productoActual.stock + item.cantidad;
-
-                            // Actualizamos el producto en la BD
-                            await supabaseClient
+                    if (detallesVenta && detallesVenta.length > 0) {
+                        for (const item of detallesVenta) {
+                            const { data: productoActual } = await supabaseClient
                                 .from('producto')
-                                .update({ stock: stockRestaurado })
-                                .eq('id_producto', item.id_producto);
+                                .select('stock')
+                                .eq('id_producto', item.id_producto)
+                                .single();
+
+                            if (productoActual) {
+                                const stockRestaurado = productoActual.stock + item.cantidad;
+                                await supabaseClient
+                                    .from('producto')
+                                    .update({ stock: stockRestaurado })
+                                    .eq('id_producto', item.id_producto);
+                            }
                         }
                     }
-                }
 
-                // --- 2. BORRADO DE LA VENTA (Mantenemos tu lógica) ---
-                const { error: errDelete } = await supabaseClient
-                    .from('venta') 
-                    .delete()
-                    .eq('id_venta', ventaSeleccionadaId);
+                    const { error: errDelete } = await supabaseClient
+                        .from('venta') 
+                        .delete()
+                        .eq('id_venta', ventaSeleccionadaId);
 
                     if (errDelete) throw errDelete;
 
                     alert("¡Venta eliminada y artesanías devueltas al inventario con éxito!");
                     location.reload(); 
-                
                 } catch (err) {
                     alert("Error al eliminar o restaurar inventario: " + err.message);
                     console.error(err);
@@ -382,37 +389,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     async function cargarProductosDatalist() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('producto')
-            .select('id_producto, nombre, precio');
+        try {
+            const { data, error } = await supabaseClient
+                .from('producto')
+                .select('id_producto, nombre, precio');
+                
+            if (error) throw error;
             
-        if (error) throw error;
-        
-        listaProductosBD = data; 
-        const datalist = document.getElementById('lista-productos');
-        
-        if (datalist) {
-            datalist.innerHTML = '';
-            data.forEach(p => {
-                // Agregamos cada producto como opción sugerida
-                datalist.innerHTML += `<option value="${p.nombre}"></option>`;
-            });
+            listaProductosBD = data; 
+            const datalist = document.getElementById('lista-productos');
+            
+            if (datalist) {
+                datalist.innerHTML = '';
+                data.forEach(p => {
+                    datalist.innerHTML += `<option value="${p.nombre}"></option>`;
+                });
+            }
+        } catch (err) {
+            console.error("Error al cargar productos para autocompletar:", err);
         }
-    } catch (err) {
-        console.error("Error al cargar productos para autocompletar:", err);
     }
-}
-const inputNombreArt = document.getElementById('v-artesania-nombre');
-if (inputNombreArt) {
-    inputNombreArt.addEventListener('change', (e) => {
-        const nombreEscrito = e.target.value;
-        // Buscamos si lo que escribió existe en la BD
-        const productoEncontrado = listaProductosBD.find(p => p.nombre === nombreEscrito);
-        
-        if (productoEncontrado) {
-            // Si lo encontró, le ahorramos trabajo a Mauricio y ponemos el precio
-            document.getElementById('v-precio-unitario').value = productoEncontrado.precio;
+
+    const inputNombreArt = document.getElementById('v-artesania-nombre');
+    if (inputNombreArt) {
+        inputNombreArt.addEventListener('change', (e) => {
+            const nombreEscrito = e.target.value;
+            const productoEncontrado = listaProductosBD.find(p => p.nombre === nombreEscrito);
+            
+            // MODIFICADO: Bloqueo del precio dinámico
+            const inputPrecio = document.getElementById('v-precio-unitario');
+            if (productoEncontrado) {
+                inputPrecio.value = productoEncontrado.precio;
+                inputPrecio.readOnly = true; // <--- ¡MÁGICO! Se vuelve de sólo lectura al detectar el producto
+            } else {
+                inputPrecio.value = '';
+                inputPrecio.readOnly = false; // Si se borra o escribe algo inválido, se libera
+            }
+        });
+    }
+    // === MOSTRAR/OCULTAR FECHA LÍMITE SEGÚN EL ESTADO DE PAGO ===
+const selectEstado = document.getElementById('v-estado-pago');
+const contenedorFecha = document.getElementById('contenedor-fecha-limite');
+const etiquetaFecha = document.getElementById('etiqueta-fecha-limite');
+const inputFechaLimite = document.getElementById('v-fecha-limite');
+
+if (selectEstado && contenedorFecha) {
+    selectEstado.addEventListener('change', (e) => {
+        const valor = e.target.value;
+
+        if (valor === 'Anticipo' || valor === 'Debe') {
+            // Si debe o dio anticipo, mostramos el campo de fecha
+            contenedorFecha.style.display = 'block';
+            inputFechaLimite.required = true; // Forzamos a que pongan una fecha
+
+            // Personalizamos el texto para que se vea más pro
+            if (valor === 'Anticipo') {
+                etiquetaFecha.textContent = "Fecha prometida de liquidación:";
+            } else {
+                etiquetaFecha.textContent = "Fecha límite para pagar deuda:";
+            }
+        } else {
+            // Si ya está pagado, lo volvemos a esconder y limpiamos el dato
+            contenedorFecha.style.display = 'none';
+            inputFechaLimite.required = false;
+            inputFechaLimite.value = '';
         }
     });
 }

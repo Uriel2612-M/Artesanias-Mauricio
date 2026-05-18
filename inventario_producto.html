@@ -47,27 +47,22 @@
             <h2>Inventario - Artesanías</h2>
             
             <section class="controles-superiores">
-                <button id="btn-nueva-artesania" class="btn-principal">Registrar nueva artesanía</button>
+                <button id="btn-nueva-artesania" class="btn-principal solo-admin">Registrar nueva artesanía</button>
                 <dialog id="modal-nueva-artesania">
                     <h2>Agregar nueva artesanía</h2>
                     <form id="form-nueva-artesania">
                     <div class="input-group">
-                        <label for="artesania-nombre">Nombre:</label>
+                        <label for="artesania-nombre">Nombre de la artesanía*:</label>
                         <input type="text" id="artesania-nombre" placeholder="Ej. Elefantes" required>
                     </div>
             
                     <div class="input-group">
-                        <label for="artesania-unidad">Unidad:</label>
+                        <label for="artesania-unidad">Unidad*:</label>
                         <input type="text" id="artesania-unidad" placeholder="piezas" required>
                     </div>
-
+                            
                     <div class="input-group">
-                        <label for="artesania-precio">Precio:</label>
-                        <input type="number" id="artesania-precio" placeholder="900" required>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="artesania-cantidad">Cantidad (Stock):</label>
+                        <label for="artesania-cantidad">Cantidad de artesanías hechas*:</label>
                         <input type="number" id="artesania-cantidad" placeholder="1" required>
                     </div>
 
@@ -76,15 +71,15 @@
                     <br>
                     
                     <div class="input-group">
-                        <label for="material-nombre">Materiales:</label>
+                        <label for="material-nombre">Materiales*:</label>
                         <input type="text" id="material-nombre" list="lista-materiales" placeholder="Escribe o selecciona...">
                         <datalist id="lista-materiales">
                         </datalist>
                     </div>
 
                     <div class="input-group">
-                        <label for="material-cantidad">Cantidad:</label>
-                        <input type="number" id="material-cantidad">
+                        <label for="material-cantidad">Cantidad*:</label>
+                        <input type="number" id="material-cantidad" required>
                     </div>
                     <button type="button" class="btn-secundario" style="font-size: 1.2rem; padding: 10px 15px;">+</button>
                 </div>
@@ -104,6 +99,17 @@
                     </tr>
                 </tbody>
             </table>
+            
+            <br><hr style="margin: 20px 0; border: 0; border-top: 2px solid var(--color-primario);"><br>
+            <div class="input-group">
+                <label>Precio de Costo (Lo que cuesta hacerlo)*:</label>
+                <input type="number" id="artesania-precio-costo" step="0.01" required>
+            </div>
+
+            <div class="input-group">
+                <label for="artesania-precio">Precio de Venta*:</label>
+                <input type="number" id="artesania-precio" placeholder="900" required>
+            </div>
 
             <div class="modal-acciones">
                 <button type="button" id="btn-cancelar-producto">Cancelar</button>
@@ -126,7 +132,9 @@
                         <th>Id</th>
                         <th>Nombre Artesania</th>
                         <th>Unidad</th>
-                        <th>Precio</th>
+                        <th>Precio de Venta</th>
+                        <th class="solo-admin">Costo de Producción</th>
+                        <th class="solo-admin">Ganancia</th>
                         <th>Stock</th>
                         <th class="solo-admin">Acciones</th>
                     </tr>
@@ -152,10 +160,14 @@
             </div>
 
             <div class="input-group">
-                <label>Precio:</label>
-                <input type="text" id="edit-precio" placeholder="Precio" required>
+                <label>Precio de Costo:</label>
+                <input type="number" id="edit-precio-costo" step="0.01" required>
             </div>
 
+            <div class="input-group">
+                <label>Precio de Venta:</label>
+                <input type="number" id="edit-precio-venta" step="0.01" required>
+            </div>
             <div class="input-group">
                 <label>Stock:</label>
                 <input type="text" id="edit-stock" placeholder="stock" required>

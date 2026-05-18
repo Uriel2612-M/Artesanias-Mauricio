@@ -13,7 +13,15 @@
         <h1>Artesanías Mauricio</h1>
         <form id="login-form">
             <div class="input-group">
-                <label for="login-usuario">Nombre de usuario:</label>
+                <select id="login-rol" required>    
+                    <option value="" disabled selected>Selecciona tu rol</option>
+                    <option value="1">Administrador</option>
+                    <option value="2">Vendedor / Usuario</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="login-usuario"> Nombre de Usuario:</label>
                 <input type="text" id="login-usuario" required>
             </div>
 

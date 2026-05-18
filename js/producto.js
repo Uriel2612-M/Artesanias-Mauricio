@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cuerpo = document.getElementById('tabla-producto-body');
         if (!cuerpo) return;
         
-        cuerpo.innerHTML = '<tr><td colspan="6">Cargando productos...</td></tr>';
+        cuerpo.innerHTML = '<tr><td colspan="7">Cargando productos...</td></tr>';
 
         try {
             const { data, error } = await supabaseClient
@@ -39,12 +39,17 @@ document.addEventListener('DOMContentLoaded', () => {
             cuerpo.innerHTML = '';
 
             data.forEach(p => {
+                const costo = p.costo_producto || 0;
+                const venta = p.precio || 0;
+                const ganancia = venta - costo; 
                 cuerpo.innerHTML += `
                     <tr>
                         <td data-label="ID">${p.id_producto}</td>
                         <td data-label="Nombre">${p.nombre}</td>
                         <td data-label="Unidad">${p.unidad || p.unidad_medida || ''}</td>
-                        <td data-label="Precio">$${p.precio}</td>
+                        <td data-label="Precio Costo" class="solo-admin">$${p.costo_producto || '0.00'}</td>
+                        <td data-label="Precio">$${p.precio || '0.00'}</td>
+                        <td data-label="Ganancia" class="solo-admin" style="color: #a8e42f; font-weight: bold;">+$${ganancia.toFixed(2)}</td>
                         <td data-label="Stock">${p.stock}</td>
                         <td data-label="Acciones" class="solo-admin">
                             <button class="btn-editar" onclick="prepararEdicion(${p.id_producto})">Editar</button>
@@ -54,11 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (err) {
             console.error(err);
-            cuerpo.innerHTML = '<tr><td colspan="6">Error al cargar.</td></tr>';
+            cuerpo.innerHTML = '<tr><td colspan="7">Error al cargar.</td></tr>';
         }
     }
-
-    
 
     // --- 4. MANEJO DEL MODAL NUEVO ---
     const modalNuevo = document.getElementById('modal-nueva-artesania');
@@ -67,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('form-nueva-artesania').reset();
             materialesParaArtesania = []; 
             renderizarMaterialesTemp();
+            calcularPreciosSugeridos();
             modalNuevo.showModal();
         };
     }
@@ -83,24 +87,48 @@ document.addEventListener('DOMContentLoaded', () => {
             const inputMaterial = document.getElementById('material-nombre');
             const nombreEscrito = inputMaterial.value; 
             const cantMat = parseInt(document.getElementById('material-cantidad').value);
-
-            
             const matInfo = listaMaterialesBD.find(m => m.nombre === nombreEscrito);
             if (matInfo && cantMat > 0) {
                 materialesParaArtesania.push({
-                    id: matInfo.id_material, // Tomamos el ID real de la base de datos
+                    id: matInfo.id_material, 
                     nombre: matInfo.nombre,
                     cant: cantMat
                 });
                 renderizarMaterialesTemp();
+                calcularPreciosSugeridos();
                 
-                // Limpiamos las cajas de texto para que pueda agregar otro
                 inputMaterial.value = '';
                 document.getElementById('material-cantidad').value = '';
             } else {
                 alert("Escribe un material válido de la lista y una cantidad mayor a 0.");
             }
         };
+    }
+    // === FUNCIÓN PARA CALCULAR PRECIOS SUGERIDOS EN VIVO ===
+function calcularPreciosSugeridos() {
+        let costoTotalMateriales = 0;
+
+        materialesParaArtesania.forEach(item => {
+            const matBD = listaMaterialesBD.find(m => m.id_material == item.id);
+            if (matBD) {
+                costoTotalMateriales += (item.cant * parseFloat(matBD.costo_unitario || 0));
+            }
+        });
+
+        const ventaSugerida = costoTotalMateriales * 3;
+
+        const inputCosto = document.getElementById('artesania-precio-costo');
+        const inputVenta = document.getElementById('artesania-precio'); // MODIFICADO: Asegurar ID correcto de venta
+
+        if (inputCosto) {
+            inputCosto.placeholder = `Sugerido: $${costoTotalMateriales.toFixed(2)}`;
+            inputCosto.dataset.sugerido = costoTotalMateriales.toFixed(2); 
+        }
+        
+        if (inputVenta) {
+            inputVenta.placeholder = `Sugerido (x3): $${ventaSugerida.toFixed(2)}`;
+            inputVenta.dataset.sugerido = ventaSugerida.toFixed(2);
+        }
     }
 
     function renderizarMaterialesTemp() {
@@ -122,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.quitarMat = (index) => {
         materialesParaArtesania.splice(index, 1);
         renderizarMaterialesTemp();
+        calcularPreciosSugeridos();
     };
 
     // --- 6. GUARDAR NUEVO PRODUCTO ---
@@ -129,8 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const nombre = document.getElementById('artesania-nombre').value;
         const unidad = document.getElementById('artesania-unidad').value;
-        const precio = parseFloat(document.getElementById('artesania-precio').value);
         const stockAAgregar = parseInt(document.getElementById('artesania-cantidad').value);
+        const inputCosto = document.getElementById('artesania-precio-costo');
+        const inputVenta = document.getElementById('artesania-precio-venta');
+        const precioCosto = parseFloat(inputCosto.value) || parseFloat(inputCosto.dataset.sugerido) || 0;
+        const precioVenta = parseFloat(inputVenta.value) || parseFloat(inputVenta.dataset.sugerido) || 0;
 
         // ==========================================
         // 1. EL CADENERO: Validar stock ANTES de insertar
@@ -142,10 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return alert(`Error: El material ${item.nombre} no se encontró en la base de datos.`);
             }
 
-            const totalNecesario = item.cant * stockAAgregar; // Lo que gasta 1 pieza * las piezas que hará
+            const totalNecesario = item.cant * stockAAgregar; 
             
             if (matOriginal.stock < totalNecesario) {
-                // Si no le alcanza, abortamos la misión y le avisamos a Mauricio
+                
                 return alert( `No hay suficiente ${item.nombre}. Tienes ${matOriginal.stock} y necesitas ${totalNecesario} para fabricar esto.`);
             }
         }
@@ -158,7 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Materiales que se van a guardar en la receta:", materialesParaArtesania)
             const { data: productoNuevo, error: errP } = await supabaseClient
                 .from('producto')
-                .insert([{ nombre, unidad, precio, stock: stockAAgregar }])
+                .insert([{ nombre: nombre, 
+                    unidad: unidad, 
+                    costo_producto: precioCosto, 
+                    precio: precioVenta,       
+                    stock: stockAAgregar }])
                 .select()
                 .single();
             if (errP) throw errP;
@@ -195,7 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 7. EDICIÓN (ADJUNTA AL WINDOW) ---
     window.prepararEdicion = async (id) => {
         productoEditandoId = id;
-        const modalEdit = document.getElementById('modal-editar-producto'); 
+        const modalEdit = document.getElementById('modal-editar-producto');
+        
         if (modalEdit) modalEdit.showModal();
 
         try {
@@ -206,7 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
             document.getElementById('edit-nombre').value = producto.nombre;
             document.getElementById('edit-unidad').value = producto.unidad || producto.unidad_medida || '';
-            document.getElementById('edit-precio').value = producto.precio || '';
+            document.getElementById('edit-precio-venta').value = producto.precio || '';
+            document.getElementById('edit-precio-costo').value = producto.costo_producto || '';
             document.getElementById('edit-stock').value = producto.stock || '';
 
         } catch (err) {
@@ -231,14 +269,15 @@ if (formEditar) {
         
         const nombre = document.getElementById('edit-nombre').value;
         const unidad = document.getElementById('edit-unidad').value;
-        const precio = parseFloat(document.getElementById('edit-precio').value);
         const stockNuevo = parseInt(document.getElementById('edit-stock').value);
+        const nuevoCosto = parseFloat(document.getElementById('edit-precio-costo').value);
+        const nuevoVenta = parseFloat(document.getElementById('edit-precio-venta').value);
 
         try {
             // 1. Obtenemos el stock que tiene actualmente en la BD
             const { data: prodViejo } = await supabaseClient
                 .from('producto')
-                .select('stock')
+                .select('*')
                 .eq('id_producto', productoEditandoId)
                 .single();
             
@@ -291,7 +330,7 @@ if (formEditar) {
             // 3. ACTUALIZACIÓN FINAL DE LA ARTESANÍA
             const { error } = await supabaseClient
                 .from('producto')
-                .update({ nombre, unidad, precio, stock: stockNuevo })
+                .update({ nombre, unidad, costo_producto: nuevoCosto, precio: nuevoVenta, stock: stockNuevo })
                 .eq('id_producto', productoEditandoId); 
 
             if (error) throw error;
@@ -357,7 +396,7 @@ if (formEditar) {
     try {
         const { data, error } = await supabaseClient
             .from('material')
-            .select('id_material, nombre, stock');
+            .select('id_material, nombre, stock, costo_unitario');
             
         if (error) throw error;
         
@@ -378,6 +417,7 @@ if (formEditar) {
     iniciarEncabezado();
     cargarProductos();
     cargarMaterialesDatalist();
+    calcularPreciosSugeridos();
     
 });
 
