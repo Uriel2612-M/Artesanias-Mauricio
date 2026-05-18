@@ -130,23 +130,39 @@ function calcularPreciosSugeridos() {
             inputVenta.dataset.sugerido = ventaSugerida.toFixed(2);
         }
     }
-
+    const inputCantidadArtesania = document.getElementById('artesania-cantidad');
+    if (inputCantidadArtesania) {
+        inputCantidadArtesania.addEventListener('input', () => {
+            renderizarMaterialesTemp();
+        });
+    }
     function renderizarMaterialesTemp() {
         const cuerpo = document.querySelector('#form-nueva-artesania table tbody');
         if (!cuerpo) return;
         cuerpo.innerHTML = '';
+
+        // Atrapamos cuántas artesanías está haciendo en total 
+        const cantArtesanias = parseInt(document.getElementById('artesania-cantidad').value) || 1;
+
         materialesParaArtesania.forEach((m, index) => {
+            // Multiplicamos la receta por la cantidad de piezas a fabricar
+            const totalADescontar = m.cant * cantArtesanias;
+
             cuerpo.innerHTML += `
                 <tr>
                     <td style="padding: 10px;">${m.nombre}</td>
-                    <td style="padding: 10px;">${m.cant}</td>
+                    
+                    <td style="padding: 10px;">
+                        <strong>${totalADescontar}</strong> 
+                        <br><small style="color: gray;">(Receta: ${m.cant} x 1 pieza)</small>
+                    </td>
+                    
                     <td style="padding: 10px;">
                         <button type="button" onclick="quitarMat(${index})" style="background:red; color:white; border:none; border-radius:3px; cursor:pointer;">Quitar</button>
                     </td>
                 </tr>`;
         });
     }
-
     window.quitarMat = (index) => {
         materialesParaArtesania.splice(index, 1);
         renderizarMaterialesTemp();
