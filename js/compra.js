@@ -60,8 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td data-label="Proveedor">${c.proveedor ? c.proveedor.nombre_proveedor : 'N/A'}</td>
                         <td data-label="Materiales">${nombresMateriales}</td>
                         <td data-label="Cantidad"><strong>${c.detalle_compra ? c.detalle_compra.reduce((sum, d) => sum + d.cantidad, 0) : 0}</strong></td>
-                        <td data-label="Precio Unitario"><strong>$${c.detalle_compra && c.detalle_compra[0]?.precio_unitario ? c.detalle_compra[0].precio_unitario.toFixed(2) : '0.00'}</strong></td>
-                        <td data-label="Total"><strong>$${c.total.toFixed(2)}</strong></td>
+                        <td data-label="Precio Unitario"><strong>$${c.detalle_compra && c.detalle_compra[0]?.precio_unitario ? c.detalle_compra[0].precio_unitario.toFixed(2) : '0.00'} MXN</strong></td>
+                        <td data-label="Total"><strong>$${c.total.toFixed(2)} MXN</strong></td>
                         <td data-label="Acciones">
                             <button class="btn-eliminar-compra" onclick="eliminarCompra(${c.id_compra})" style="background: red; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Eliminar</button>
                         </td>

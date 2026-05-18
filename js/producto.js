@@ -47,9 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td data-label="ID">${p.id_producto}</td>
                         <td data-label="Nombre">${p.nombre}</td>
                         <td data-label="Unidad">${p.unidad || p.unidad_medida || ''}</td>
-                        <td data-label="Precio Costo" class="solo-admin">$${p.costo_producto || '0.00'}</td>
-                        <td data-label="Precio">$${p.precio || '0.00'}</td>
-                        <td data-label="Ganancia" class="solo-admin" style="color: #a8e42f; font-weight: bold;">+$${ganancia.toFixed(2)}</td>
+                        <td data-label="Precio Costo" class="solo-admin">$${p.costo_producto  || '0.00'} MXN</td>
+                        <td data-label="Precio">$${p.precio || '0.00'} MXN</td>
+                        <td data-label="Ganancia" class="solo-admin" style="color: #a8e42f; font-weight: bold;">+$${ganancia.toFixed(2)} MXN</td>
                         <td data-label="Stock">${p.stock}</td>
                         <td data-label="Acciones" class="solo-admin">
                             <button class="btn-editar" onclick="prepararEdicion(${p.id_producto})">Editar</button>

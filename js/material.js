@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tr>
                         <td data-label="ID">${m.id_material}</td>
                         <td data-label="Nombre">${m.nombre}</td>
-                        <td data-label="Precio Unitario" class="solo-admin">${m.costo_unitario ? '$' + m.costo_unitario.toFixed(2) : ''}</td>
+                        <td data-label="Precio Unitario" class="solo-admin">${m.costo_unitario ? '$' + m.costo_unitario.toFixed(2) : ''} MXN</td>
                         <td data-label="Unidad">${m.unidad || ''}</td>
                         <td data-label="Stock">${m.stock}</td>
                         <td data-label="Caducidad">${diseñoCaducidad}</td>
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(document.getElementById('btn-cancelar-material')) {
         document.getElementById('btn-cancelar-material').onclick = () => {
-        document.getElementById('form-nuevo-material').reset(); // <--- ESTA ES LA MAGIA
+        document.getElementById('form-nuevo-material').reset(); 
             modalNuevo.close();
         };
     }

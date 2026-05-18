@@ -234,9 +234,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td data-label="Apellido Paterno">${ape}</td>                    
                             <td data-label="Apellido Materno">${apeMat}</td>        
                             <td data-label="Productos">${nombresArt}</td>        
-                            <td data-label="Total">$${totalReal}</td>        
-                            <td data-label="Abono">$${abono}</td>            
-                            <td data-label="Saldo" style="color: ${saldo > 0 ? 'red' : '#a8e42f'}">$${saldo.toFixed(2)}</td> 
+                            <td data-label="Total">$${totalReal} MXN</td>        
+                            <td data-label="Abono">$${abono} MXN</td>            
+                            <td data-label="Saldo" style="color: ${saldo > 0 ? 'red' : '#a8e42f'}">$${saldo.toFixed(2)} MXN</td> 
                             <td data-label="Estado">${diseñoEstado}</td>
                             <td data-label="Acciones" class="solo-admin"> <button class="btn-editar" onclick="abrirEditorVenta('${ventaJSON}')">Editar</button>
                             </td>
