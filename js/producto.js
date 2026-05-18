@@ -42,6 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const costo = p.costo_producto || 0;
                 const venta = p.precio || 0;
                 const ganancia = venta - costo; 
+                let colorGanancia = "#888"; // Gris por defecto (si la ganancia es 0)
+                let signoGanancia = "$";
+                let gananciaAbsoluta = Math.abs(ganancia).toFixed(2);
+                if (ganancia > 0) {
+                    colorGanancia = "#a8e42f"; // Verde (Ganancia)
+                    signoGanancia = "+$";
+                } else if (ganancia < 0) {
+                    colorGanancia = "#ff4d4d"; // Rojo intenso (Pérdida)
+                    signoGanancia = "-$";
+                }
                 cuerpo.innerHTML += `
                     <tr>
                         <td data-label="ID">${p.id_producto}</td>
@@ -49,7 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td data-label="Unidad">${p.unidad || p.unidad_medida || ''}</td>
                         <td data-label="Precio Costo" class="solo-admin">$${p.costo_producto  || '0.00'} MXN</td>
                         <td data-label="Precio">$${p.precio || '0.00'} MXN</td>
-                        <td data-label="Ganancia" class="solo-admin" style="color: #a8e42f; font-weight: bold;">+$${ganancia.toFixed(2)} MXN</td>
+                       <td data-label="Ganancia" class="solo-admin" style="color: ${colorGanancia}; font-weight: bold;">
+                            ${signoGanancia}${gananciaAbsoluta} MXN
+                        </td>
                         <td data-label="Stock">${p.stock}</td>
                         <td data-label="Acciones" class="solo-admin">
                             <button class="btn-editar" onclick="prepararEdicion(${p.id_producto})">Editar</button>
