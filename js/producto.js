@@ -160,7 +160,7 @@ function calcularPreciosSugeridos() {
         const unidad = document.getElementById('artesania-unidad').value;
         const stockAAgregar = parseInt(document.getElementById('artesania-cantidad').value);
         const inputCosto = document.getElementById('artesania-precio-costo');
-        const inputVenta = document.getElementById('artesania-precio-venta');
+        const inputVenta = document.getElementById('artesania-precio');
         const precioCosto = parseFloat(inputCosto.value) || parseFloat(inputCosto.dataset.sugerido) || 0;
         const precioVenta = parseFloat(inputVenta.value) || parseFloat(inputVenta.dataset.sugerido) || 0;
 
