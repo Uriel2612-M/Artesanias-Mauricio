@@ -56,22 +56,22 @@
                         <form id="form-nuevo-material">
                             <div class="input-group">
                                 <label for="material-nombre">Nombre del material*:</label>
-                                <input type="text" id="material-nombre" placeholder="Ej. Lamina" required>
+                                <input type="text" id="material-nombre" placeholder="Ej. Lamina" required maxlength="20">
                             </div>
                             
                             <div class="input-group">
                                 <label for="precio-unitario">Precio Unitario*:</label>
-                                <input type="number" id="precio-unitario" step="0.01" placeholder="0.00" required>
+                                <input type="number" id="precio-unitario" step="0.01" placeholder="0.00" required min="1" max="500000">
                             </div>
 
                             <div class="input-group">
                                 <label for="material-unidad">Unidad*:</label>
-                                <input type="text" id="material-unidad" placeholder="piezas" required>
+                                <input type="text" id="material-unidad" placeholder="piezas" required maxlength="20">
                             </div>
 
                             <div class="input-group">
                                 <label for="material-cantidad">Cantidad (Stock)*:</label>
-                                <input type="number" id="material-cantidad" placeholder="1" required>
+                                <input type="number" id="material-cantidad" placeholder="1" required min="1" max="20000">
                             </div>
 
                             <div class="input-group">
@@ -117,22 +117,22 @@
 
             <div class="input-group">
                 <label>Nombre Material:</label>
-                <input type="text" id="edit-nombre" required>
+                <input type="text" id="edit-nombre" required maxlength="20">
             </div>
 
             <div class="input-group">
                 <label for="edit-precio">Precio Unitario:</label>
-                <input type="number" id="edit-precio" step="0.01" placeholder="0.00" required>
+                <input type="number" id="edit-precio" step="0.01" placeholder="0.00" required min="1" max="500000">
             </div>
 
             <div class="input-group">
                 <label>Unidad:</label>
-                <input type="text" id="edit-unidad" placeholder="Unidad" required>
+                <input type="text" id="edit-unidad" placeholder="Unidad" required maxlength="20">
             </div>
 
             <div class="input-group">
                 <label>Stock:</label>
-                <input type="text" id="edit-stock" placeholder="stock" required>
+                <input type="number" id="edit-stock" placeholder="stock" required min="1" max="20000">
             </div>
 
             <div class="input-group">

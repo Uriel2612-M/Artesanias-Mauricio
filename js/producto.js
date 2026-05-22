@@ -332,7 +332,7 @@ if (formEditar) {
 
                         // Si lo que necesita es más de lo que hay en bodega... ¡ALERTA!
                         if (matActual.stock < materialNecesarioExtra) {
-                            return alert(`¡No se puede, apa! Para aumentar el stock necesitas ${materialNecesarioExtra} de ${matActual.nombre}, pero solo te quedan ${matActual.stock} en el inventario.`);
+                            return alert(`¡No se puede! Para aumentar el stock necesitas ${materialNecesarioExtra} de ${matActual.nombre}, pero solo te quedan ${matActual.stock} en el inventario.`);
                         }
                     }
 

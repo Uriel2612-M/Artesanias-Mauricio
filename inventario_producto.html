@@ -53,17 +53,17 @@
                     <form id="form-nueva-artesania">
                     <div class="input-group">
                         <label for="artesania-nombre">Nombre de la artesanía*:</label>
-                        <input type="text" id="artesania-nombre" placeholder="Ej. Elefantes" required>
+                        <input type="text" id="artesania-nombre" placeholder="Ej. Elefantes" required maxlength="30">
                     </div>
             
                     <div class="input-group">
                         <label for="artesania-unidad">Unidad*:</label>
-                        <input type="text" id="artesania-unidad" placeholder="piezas" required>
+                        <input type="text" id="artesania-unidad" placeholder="piezas" required maxlength="10">
                     </div>
                             
                     <div class="input-group">
                         <label for="artesania-cantidad">Cantidad de artesanías hechas*:</label>
-                        <input type="number" id="artesania-cantidad" placeholder="1" required>
+                        <input type="number" id="artesania-cantidad" placeholder="1" required min="1" max="20">
                     </div>
 
                     <hr style="margin: 20px 0; border: 0; border-top: 2px solid var(--color-primario);">
@@ -72,14 +72,14 @@
                     
                     <div class="input-group">
                         <label for="material-nombre">Materiales*:</label>
-                        <input type="text" id="material-nombre" list="lista-materiales" placeholder="Escribe o selecciona...">
+                        <input type="text" id="material-nombre" list="lista-materiales" placeholder="Escribe o selecciona..." maxlength="200">
                         <datalist id="lista-materiales">
                         </datalist>
                     </div>
 
                     <div class="input-group">
                         <label for="material-cantidad">Cantidad*:</label>
-                        <input type="number" id="material-cantidad">
+                        <input type="number" id="material-cantidad" min="1" max="20000">
                     </div>
                     <button type="button" class="btn-secundario" style="font-size: 1.2rem; padding: 10px 15px;">+</button>
                 </div>
@@ -103,12 +103,12 @@
             <br><hr style="margin: 20px 0; border: 0; border-top: 2px solid var(--color-primario);"><br>
             <div class="input-group">
                 <label>Precio de Costo (Lo que cuesta hacerlo)*:</label>
-                <input type="number" id="artesania-precio-costo" step="0.01" required>
+                <input type="number" id="artesania-precio-costo" step="0.01" required min="1" max="1000000">
             </div>
 
             <div class="input-group">
                 <label for="artesania-precio">Precio de Venta*:</label>
-                <input type="number" id="artesania-precio" placeholder="900" required>
+                <input type="number" id="artesania-precio" placeholder="900" required min="1" max="1000000">
             </div>
 
             <div class="modal-acciones">
@@ -151,26 +151,26 @@
 
             <div class="input-group">
                 <label>Nombre Artesania:</label>
-                <input type="text" id="edit-nombre" >
+                <input type="text" id="edit-nombre" required maxlength="30">
             </div>
 
             <div class="input-group">
                 <label>Unidad:</label>
-                <input type="text" id="edit-unidad" placeholder="Unidad">
+                <input type="text" id="edit-unidad" placeholder="Unidad" required maxlength="10">
             </div>
 
             <div class="input-group">
                 <label>Precio de Costo:</label>
-                <input type="number" id="edit-precio-costo" step="0.01">
+                <input type="number" id="edit-precio-costo" step="0.01" min="1" max="1000000">
             </div>
 
             <div class="input-group">
                 <label>Precio de Venta:</label>
-                <input type="number" id="edit-precio-venta" step="0.01">
+                <input type="number" id="edit-precio-venta" step="0.01" min="1" max="1000000">
             </div>
             <div class="input-group">
                 <label>Stock:</label>
-                <input type="text" id="edit-stock" placeholder="stock">
+                <input type="number" id="edit-stock" placeholder="stock" min="1" max="20000">
             </div>
 
             <div class="modal-acciones">

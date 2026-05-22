@@ -52,21 +52,21 @@
                 
                 
                 <div class="input-group">
-                    <label>Nombre del cliente*:</label> <input type="text" id="v-nombre">
+                    <label>Nombre del cliente*:</label> <input type="text" id="v-nombre" maxlength="20" required>
                 </div>
                 <div class="input-group">
-                    <label>Apellido Paterno*:</label> <input type="text" id="v-apellido-paterno" required>
-                </div>
-
-                <div class="input-group">
-                    <label>Apellido Materno*:</label> <input type="text" id="v-apellido-materno" required>
+                    <label>Apellido Paterno*:</label> <input type="text" id="v-apellido-paterno" maxlength="20" required>
                 </div>
 
                 <div class="input-group">
-                    <label>Teléfono:</label> <input type="text" id="v-telefono">
+                    <label>Apellido Materno*:</label> <input type="text" id="v-apellido-materno" maxlength="20" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Teléfono:</label> <input type="text" id="v-telefono" maxlength="10">
                 </div>
                 <div class="input-group">
-                    <label>Fecha de venta*:</label> <input type="date" id="v-fecha-entrega" required>
+                    <label>Fecha de venta*:</label> <input type="date" id="v-fecha-entrega"  readonly>
                 </div>
 
                 <div class="input-group">
@@ -106,12 +106,12 @@
 
                 <div class="input-group">
                     <label>Monto Recibido (Abono $):</label>
-                    <input type="number" id="v-abono" placeholder="¿Cuánto pagó hoy?">
+                    <input type="number" id="v-abono" placeholder="¿Cuánto pagó hoy?" required min="1" max="1000000">
                 </div>
 
                 <div class="input-group">
                     <label>Saldo Pendiente ($):</label>
-                    <input type="number" id="v-saldo-restante" readonly style="color: red; font-weight: bold;">
+                    <input type="number" id="v-saldo-restante" min="1" max="1000000" readonly style="color: red; font-weight: bold;">
                 </div>
                 
             <div class="input-group">
@@ -186,10 +186,10 @@
         </div>
         
         <label>Total de la Venta ($):</label>
-        <input type="number" id="edit-total-venta" readonly style="background:#eee">
+        <input type="number" id="edit-total-venta" min="1" max="1000000" readonly style="background:#eee">
 
         <label>Monto Pagado ($):</label>
-        <input type="number" id="edit-monto-pagado" step="0.01">
+        <input type="number" id="edit-monto-pagado" min="1" max="1000000" step="0.01">
 
         <label>Estado:</label>
         <select id="edit-estado-pago">

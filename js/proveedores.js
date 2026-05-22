@@ -29,7 +29,11 @@ async function cargarProveedores() {
                 <td data-label="ID">#${prove.id_proveedor}</td>
                 <td data-label="Nombre">${prove.nombre_proveedor}</td>
                 <td data-label="Teléfono">${prove.telefono || 'Sin teléfono'}</td>
-                <td data-label="Dirección">${prove.direccion || 'Sin dirección'}</td>
+                <td data-label="Calle">${prove.calle || 'Sin calle'}</td>
+                <td data-label="Número">${prove.numero_externo || 'Sin número'}</td>
+                <td data-label="Colonia">${prove.colonia || 'Sin colonia'}</td>
+                <td data-label="Ciudad">${prove.ciudad || 'Sin ciudad'}</td>
+                <td data-label="Estado">${prove.estado || 'Sin estado'}</td>
                 <td data-label="Acciones" class="solo-admin">
                     <button class="btn-editar" onclick="prepararEdicion(${prove.id_proveedor})">Editar</button>
                 </td>
@@ -59,7 +63,11 @@ window.prepararEdicion = async (id) => {
         // OJO: Usamos IDs diferentes para el modal de edición
         document.getElementById('edit-proveedor-nombre').value = proveedor.nombre_proveedor;
         document.getElementById('edit-proveedor-telefono').value = proveedor.telefono || '';
-        document.getElementById('edit-proveedor-direccion').value = proveedor.direccion || '';
+        document.getElementById('edit-proveedor-calle').value = proveedor.calle || '';
+        document.getElementById('edit-proveedor-numero').value = proveedor.numero || '';
+        document.getElementById('edit-proveedor-colonia').value = proveedor.colonia || '';
+        document.getElementById('edit-proveedor-ciudad').value = proveedor.ciudad || '';
+        document.getElementById('edit-proveedor-estado').value = proveedor.estado || '';
     } catch (err) {
         console.error("Error:", err);
     }
@@ -84,16 +92,24 @@ document.addEventListener('DOMContentLoaded', () => {
         formNuevo.onsubmit = async (e) => {
             e.preventDefault();
             const nombreVal = document.getElementById('proveedor-nombre').value;
-            const direccionVal = document.getElementById('proveedor-direccion').value;
             const telefonoVal = document.getElementById('proveedor-telefono').value;
+            const calle = document.getElementById('proveedor-calle').value;
+            const numero = document.getElementById('proveedor-numero').value;
+            const colonia = document.getElementById('proveedor-colonia').value;
+            const ciudad = document.getElementById('proveedor-ciudad').value;
+            const estado = document.getElementById('proveedor-estado').value;
 
             try {
                 const { error } = await supabaseClient
                     .from('proveedor')
                     .insert([{ 
                         nombre_proveedor: nombreVal, 
-                        direccion: direccionVal, 
-                        telefono: telefonoVal 
+                        telefono: telefonoVal, 
+                        calle: calle || null,
+                        numero_externo: numero || null,
+                        colonia: colonia || null,
+                        ciudad: ciudad || null,
+                        estado: estado || null 
                     }]);
                 
                 if (error) throw error;
@@ -119,17 +135,25 @@ document.addEventListener('DOMContentLoaded', () => {
         formEdit.onsubmit = async (e) => {
             e.preventDefault();
             const nombreVal = document.getElementById('edit-proveedor-nombre').value;
-            const direccionVal = document.getElementById('edit-proveedor-direccion').value;
             const telefonoVal = document.getElementById('edit-proveedor-telefono').value;
+            const calle = document.getElementById('edit-proveedor-calle').value;
+            const numero = document.getElementById('edit-proveedor-numero').value;
+            const colonia = document.getElementById('edit-proveedor-colonia').value;
+            const ciudad = document.getElementById('edit-proveedor-ciudad').value;
+            const estado = document.getElementById('edit-proveedor-estado').value;
 
             try {
                 const { error } = await supabaseClient
                     .from('proveedor')
                     .update({ 
                         nombre_proveedor: nombreVal, 
-                        direccion: direccionVal, 
-                        telefono: telefonoVal 
-                    })
+                        telefono: telefonoVal,
+                        calle: calle || null, 
+                        numero_externo: numero || null,
+                        colonia: colonia || null,
+                        ciudad: ciudad || null,
+                        estado: estado || null
+                    })  
                     .eq('id_proveedor', proveedoresEditandoId);
                 
                 if (error) throw error;

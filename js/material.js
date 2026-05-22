@@ -97,6 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 4. GUARDAR NUEVO MATERIAL ---
+    const hoy = new Date().toISOString().split('T')[0];
+    const inputCaducidad = document.getElementById('mat-caducidad');
+
+    if (inputCaducidad) {
+        inputCaducidad.min = hoy; // Ayer y atrás aparecerán deshabilitados (transparentes) en el calendario
+    }
     document.getElementById('form-nuevo-material').onsubmit = async (e) => {
         e.preventDefault();
         const nombre = document.getElementById('material-nombre').value;

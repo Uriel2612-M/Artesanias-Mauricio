@@ -24,8 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 2. MANEJO DEL MODAL ---
     const modal = document.getElementById('modal-venta');
-    const btnNuevaVenta = document.getElementById('btn-nueva-venta');
-    
+    const btnNuevaVenta = document.getElementById('btn-nueva-venta'); 
     if(btnNuevaVenta) btnNuevaVenta.onclick = () => modal.showModal();
     
     document.getElementById('btn-cancelar-venta').onclick = () => {
@@ -100,67 +99,100 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- 4. FINALIZAR COMPRA ---
-    document.getElementById('form-venta').onsubmit = async (e) => {
-        e.preventDefault();
-        if (carrito.length === 0) return alert("Agrega artesanías al carrito primero.");
+    // === 1. ESTO VA AFUERA (Para que la fecha se bloquee apenas abra la página) ===
+const hoyVenta = new Date().toISOString().split('T')[0];
+const inputFechaVenta = document.getElementById('v-fecha-entrega'); 
+if (inputFechaVenta) {
+    inputFechaVenta.value = hoyVenta; // Predeterminamos el día de hoy
+    inputFechaVenta.min = hoyVenta;   // Bloqueamos días pasados en el calendario
+}
 
-        const btnGuardar = document.getElementById('btn-finalizar');
-        btnGuardar.disabled = true;
-        btnGuardar.textContent = 'Guardando...';
+// === 2. TU FUNCIÓN ONSUBMIT CORREGIDA Y BLINDADA ===
+document.getElementById('form-venta').onsubmit = async (e) => {
+    e.preventDefault();
+    if (carrito.length === 0) return alert("Agrega artesanías al carrito primero.");
 
-        try {
-            // 1. Insertar Cliente 
-            // MODIFICADO: Ahora jala de forma separada v-apellido-paterno y v-apellido-materno
-            const { data: nuevoCliente, error: errCliente } = await supabaseClient
-                .from('cliente')
-                .insert([{
-                    nombre: document.getElementById('v-nombre').value,
-                    apellido_pat: document.getElementById('v-apellido-paterno').value,
-                    apellido_mat: document.getElementById('v-apellido-materno').value
-                }])
-                .select().single();
+    const btnGuardar = document.getElementById('btn-finalizar');
+    btnGuardar.disabled = true;
+    btnGuardar.textContent = 'Guardando...';
 
-            if (errCliente) throw errCliente;
+    try {
+        // 1. Insertar Cliente 
+        const { data: nuevoCliente, error: errCliente } = await supabaseClient
+            .from('cliente')
+            .insert([{
+                nombre: document.getElementById('v-nombre').value,
+                apellido_pat: document.getElementById('v-apellido-paterno').value,
+                apellido_mat: document.getElementById('v-apellido-materno').value
+            }])
+            .select().single();
 
-            // 2. Insertar Venta
-            const { data: nuevaVenta, error: errVenta } = await supabaseClient
-                .from('venta')
-                .insert([{
-                    id_cliente: nuevoCliente.id_cliente,
-                    total_venta: totalVenta, 
-                    monto_pagado: parseFloat(document.getElementById('v-abono').value) || 0, 
-                    fecha: document.getElementById('v-fecha-entrega').value || new Date().toISOString().split('T')[0],
-                    estado_pago: document.getElementById('v-estado-pago').value,
-                    fecha_limite: document.getElementById('v-fecha-limite').value || null
-                }])
-                .select().single();
+        if (errCliente) throw errCliente;
 
-            if (errVenta) throw errVenta;
+        // 2. Insertar Venta
+        const { data: nuevaVenta, error: errVenta } = await supabaseClient
+            .from('venta')
+            .insert([{
+                id_cliente: nuevoCliente.id_cliente,
+                total_venta: totalVenta, 
+                monto_pagado: parseFloat(document.getElementById('v-abono').value) || 0, 
+                // Usamos la variable global de hoy por si no agarra la caja de texto
+                fecha: document.getElementById('v-fecha-entrega').value || hoyVenta,
+                estado_pago: document.getElementById('v-estado-pago').value,
+                fecha_limite: document.getElementById('v-fecha-limite').value || null
+            }])
+            .select().single();
 
-            // 3. Insertar Detalles
-            const detalles = carrito.map(item => ({
-                id_venta: nuevaVenta.id_venta,
-                id_producto: item.id_producto, 
-                cantidad: item.cant,
-                precio_unitario: item.precio
-            }));
+        if (errVenta) throw errVenta;
 
-            const { error: errDetalle } = await supabaseClient
-                .from('detalle_venta').insert(detalles);
+        // 3. Insertar Detalles
+        const detalles = carrito.map(item => ({
+            id_venta: nuevaVenta.id_venta,
+            id_producto: item.id_producto, 
+            cantidad: item.cant,
+            precio_unitario: item.precio
+        }));
 
-            if (errDetalle) throw errDetalle;
+        const { error: errDetalle } = await supabaseClient
+            .from('detalle_venta').insert(detalles);
 
-            alert("¡Venta registrada con éxito!");
-            location.reload();
+        if (errDetalle) throw errDetalle;
 
-        } catch (error) {
-            console.error(error);
-            alert("Error: " + error.message);
-        } finally {
-            btnGuardar.disabled = false;
-            btnGuardar.textContent = 'Registrar nueva compra';
+        // ==============================================================
+        // 4. MAGIA: DESCONTAR EL STOCK DE LOS PRODUCTOS VENDIDOS
+        // ==============================================================
+        for (const item of carrito) {
+            // Traemos el stock actual del producto
+            const { data: prodActual } = await supabaseClient
+                .from('producto')
+                .select('stock')
+                .eq('id_producto', item.id_producto)
+                .single();
+
+            if (prodActual) {
+                // Restamos la cantidad que acaba de vender
+                const stockCorregido = prodActual.stock - item.cant;
+
+                // Actualizamos la base de datos
+                await supabaseClient
+                    .from('producto')
+                    .update({ stock: stockCorregido })
+                    .eq('id_producto', item.id_producto);
+            }
         }
-    };
+        // ==============================================================
+
+        alert("¡Venta registrada con éxito y stock actualizado!");
+        location.reload();
+
+    } catch (error) {
+        console.error(error);
+        alert("Error: " + error.message);
+    } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.textContent = 'Registrar nueva venta'; // Texto corregido
+    }
+};
 
     // --- 5. CARGAR HISTORIAL ---
     async function cargarVentas() {
