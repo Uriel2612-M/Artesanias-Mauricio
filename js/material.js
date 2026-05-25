@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    function capitalizarTexto(texto) {
+        if (!texto) return ''; // Si está vacío, no hace nada
+        return texto.toLowerCase().replace(/\b\w/g, letra => letra.toUpperCase());
+    }
     // === VARIABLES GLOBALES ===
     let materialEditandoId = null;
 
@@ -97,16 +101,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- 4. GUARDAR NUEVO MATERIAL ---
-    const hoy = new Date().toISOString().split('T')[0];
-    const inputCaducidad = document.getElementById('mat-caducidad');
 
+    const fechaLocal = new Date();
+    const hoy = fechaLocal.getFullYear() + '-' + 
+                String(fechaLocal.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(fechaLocal.getDate()).padStart(2, '0');
+    
+    // 2. Aplicamos el candado al calendario (Tu lógica aquí ya estaba perfecta)
+    const inputCaducidad = document.getElementById('mat-caducidad');
     if (inputCaducidad) {
-        inputCaducidad.min = hoy; // Ayer y atrás aparecerán deshabilitados (transparentes) en el calendario
+        inputCaducidad.min = hoy; // Ayer y atrás aparecerán deshabilitados
     }
     document.getElementById('form-nuevo-material').onsubmit = async (e) => {
         e.preventDefault();
-        const nombre = document.getElementById('material-nombre').value;
-        const unidad = document.getElementById('material-unidad').value;
+        const nombre = capitalizarTexto(document.getElementById('material-nombre').value);
+        const unidad = capitalizarTexto(document.getElementById('material-unidad').value);
         const stockAAgregar = parseInt(document.getElementById('material-cantidad').value);
         const precioCostoInicial = parseFloat(document.getElementById('precio-unitario').value) || 0;
         const caducidad = document.getElementById('mat-caducidad').value || null;
@@ -129,16 +138,16 @@ document.addEventListener('DOMContentLoaded', () => {
         materialEditandoId = id;
         const modalEdit = document.getElementById('modal-editar-material'); 
         if (modalEdit) modalEdit.showModal();
-
+        
         try {
             const { data: material, error } = await supabaseClient
                 .from('material').select('*').eq('id_material', id).single(); 
 
             if (error) throw error;
     
-            document.getElementById('edit-nombre').value = material.nombre;
+            document.getElementById('edit-nombre').value = capitalizarTexto(material.nombre);
             document.getElementById('edit-precio').value = material.costo_unitario || '';
-            document.getElementById('edit-unidad').value = material.unidad || '';
+            document.getElementById('edit-unidad').value = capitalizarTexto(material.unidad) || '';
             document.getElementById('edit-stock').value = material.stock || '';
             document.getElementById('edit-caducidad').value = material.fecha_caducidad ? material.fecha_caducidad.split('T')[0] : '';
 
@@ -147,29 +156,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const btnCancelarEdit = document.getElementById('btn-cerrar-edit'); 
-    if (btnCancelarEdit) {
-        btnCancelarEdit.onclick = () => {
-            document.getElementById('modal-editar-material').close();
-            materialEditandoId = null;
-        };
-    }
+    // 2. Atrapamos LA CAJA HTML (sin el .value)
+    const inputCaducidadEdit = document.getElementById('edit-caducidad');
 
-    // GUARDAR EDICIÓN
+    // 3. Le aplicamos el candado al calendario para que bloquee el pasado
+        if (inputCaducidadEdit) {
+            inputCaducidadEdit.min = hoy; 
+        }
     const formEditar = document.getElementById('form-editar-material');
     if (formEditar) {
         formEditar.onsubmit = async (e) => {
             e.preventDefault(); 
-            const nombre = document.getElementById('edit-nombre').value;
-            const unidad = document.getElementById('edit-unidad').value;
+            const nombre = capitalizarTexto(document.getElementById('edit-nombre').value);
+            const unidad = capitalizarTexto(document.getElementById('edit-unidad').value);
             const stock = parseInt(document.getElementById('edit-stock').value);
             const precioCostoInicial = parseFloat(document.getElementById('edit-precio').value) || 0;
-            const caducidad = document.getElementById('edit-caducidad').value || null;
+            const caducidadFinal = document.getElementById('edit-caducidad').value || null;
+
+            if (caducidadFinal && caducidadFinal < hoy) {
+            alert("¡Error! No puedes poner una fecha de caducidad que ya pasó.");
+            return; // <--- Aborta la misión, no manda nada a la base de datos
+            }
             try {
                 
                 const { error } = await supabaseClient
                     .from('material')
-                    .update({ nombre, unidad, stock, costo_unitario: precioCostoInicial, fecha_caducidad: caducidad })
+                    .update({ nombre, unidad, stock, costo_unitario: precioCostoInicial, fecha_caducidad: caducidadFinal })
                     .eq('id_material', materialEditandoId); 
 
                 if (error) throw error;
@@ -180,6 +192,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     }
+    const btnCancelar = document.getElementById('btn-cerrar-edit');
+
+if (btnCancelar) {
+    btnCancelar.onclick = (e) => {
+        e.preventDefault(); // Frenamos cualquier intento de recargar la página
+
+        // 1. Limpiamos el estado sucio del formulario
+        const formEdit = document.getElementById('form-editar-material');
+        if (formEdit) formEdit.reset(); 
+        
+        // 2. Atrapamos el modal directamente del DOM y lo cerramos
+        const modalVisual = document.getElementById('modal-editar-material'); 
+        if (modalVisual) {
+            modalVisual.close();
+        } else {
+            console.error("No encontré el modal en el HTML, revisa el ID.");
+        }
+    };
+}
     // --- LÓGICA PARA ELIMINAR Material ---
     const btnEliminarP = document.getElementById('btn-eliminar-registro');
         if (btnEliminarP) {

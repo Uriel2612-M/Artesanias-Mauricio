@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    function capitalizarTexto(texto) {
+        if (!texto) return ''; // Si está vacío, no hace nada
+        return texto.toLowerCase().replace(/\b\w/g, letra => letra.toUpperCase());
+    }
     // === VARIABLES GLOBALES ===
     let materialesParaArtesania = []; 
     let listaMaterialesBD = []; 
@@ -130,7 +135,7 @@ function calcularPreciosSugeridos() {
         const ventaSugerida = costoTotalMateriales * 3;
 
         const inputCosto = document.getElementById('artesania-precio-costo');
-        const inputVenta = document.getElementById('artesania-precio'); // MODIFICADO: Asegurar ID correcto de venta
+        const inputVenta = document.getElementById('artesania-precio'); 
 
         if (inputCosto) {
             inputCosto.placeholder = `Sugerido: $${costoTotalMateriales.toFixed(2)}`;
@@ -184,8 +189,8 @@ function calcularPreciosSugeridos() {
     // --- 6. GUARDAR NUEVO PRODUCTO ---
     document.getElementById('form-nueva-artesania').onsubmit = async (e) => {
         e.preventDefault();
-        const nombre = document.getElementById('artesania-nombre').value;
-        const unidad = document.getElementById('artesania-unidad').value;
+        const nombre = capitalizarTexto(document.getElementById('artesania-nombre').value);
+        const unidad = capitalizarTexto(document.getElementById('artesania-unidad').value);
         const stockAAgregar = parseInt(document.getElementById('artesania-cantidad').value);
         const inputCosto = document.getElementById('artesania-precio-costo');
         const inputVenta = document.getElementById('artesania-precio');
@@ -269,8 +274,8 @@ function calcularPreciosSugeridos() {
 
             if (error) throw error;
     
-            document.getElementById('edit-nombre').value = producto.nombre;
-            document.getElementById('edit-unidad').value = producto.unidad || producto.unidad_medida || '';
+            document.getElementById('edit-nombre').value = capitalizarTexto(producto.nombre);
+            document.getElementById('edit-unidad').value = capitalizarTexto(producto.unidad) || capitalizarTexto(producto.unidad_medida) || '';
             document.getElementById('edit-precio-venta').value = producto.precio || '';
             document.getElementById('edit-precio-costo').value = producto.costo_producto || '';
             document.getElementById('edit-stock').value = producto.stock || '';
@@ -295,8 +300,8 @@ if (formEditar) {
     formEditar.onsubmit = async (e) => {
         e.preventDefault(); 
         
-        const nombre = document.getElementById('edit-nombre').value;
-        const unidad = document.getElementById('edit-unidad').value;
+        const nombre = capitalizarTexto(document.getElementById('edit-nombre').value);
+        const unidad = capitalizarTexto(document.getElementById('edit-unidad').value);
         const stockNuevo = parseInt(document.getElementById('edit-stock').value);
         const nuevoCosto = parseFloat(document.getElementById('edit-precio-costo').value);
         const nuevoVenta = parseFloat(document.getElementById('edit-precio-venta').value);

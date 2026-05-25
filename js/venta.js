@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    function capitalizarTexto(texto) {
+        if (!texto) return ''; // Si está vacío, no hace nada
+        return texto.toLowerCase().replace(/\b\w/g, letra => letra.toUpperCase());
+    }
+    
     let carrito = [];
     let totalVenta = 0;
     let ventaSeleccionadaId = null;
@@ -36,62 +42,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 3. CARRITO TEMPORAL ---
     document.getElementById('btn-agregar-item').onclick = () => {
-        const nombreArt = document.getElementById('v-artesania-nombre').value;
-        const cant = parseInt(document.getElementById('v-cantidad').value);
-        const precioManual = parseFloat(document.getElementById('v-precio-unitario').value);
-        const prodBD = listaProductosBD.find(p => p.nombre === nombreArt);
-        const idReal = prodBD ? prodBD.id_producto : null;
+    const nombreArt = capitalizarTexto(document.getElementById('v-artesania-nombre').value);
+    const cant = parseInt(document.getElementById('v-cantidad').value);
+    const precioManual = parseFloat(document.getElementById('v-precio-unitario').value);
+    
+    // 1. Buscamos si de verdad existe en la base de datos
+    const prodBD = listaProductosBD.find(p => p.nombre === nombreArt);
+    
+    // ==============================================================
+    // 2. EL CADENERO: SI NO LO ENCUENTRA, LO REBOTA AQUÍ MISMO
+    // ==============================================================
+    if (!prodBD) {
+        alert("¡Error! La artesanía no existe. Selecciona una opción válida de la lista.");
+        return; 
+    }
+    // ==============================================================
 
-        if(nombreArt && cant > 0 && precioManual > 0) {
-            carrito.push({ 
-                id_producto: idReal,
-                nombre: nombreArt, 
-                cant, 
-                precio: precioManual, 
-                subtotal: cant * precioManual 
-            });
-            
-            document.getElementById('v-artesania-nombre').value = '';
-            document.getElementById('v-cantidad').value = '1';
-            
-            // MODIFICADO: Al limpiar el input de precio, le regresamos la edición libre temporalmente
-            const inputPrecio = document.getElementById('v-precio-unitario');
-            inputPrecio.value = '';
-            inputPrecio.readOnly = false; 
-            
-            renderizarCarrito();
-        } else {
-            alert("Coloca nombre, cantidad y precio válido.");
-        }
-    };
+    // Si pasó el cadenero, significa que prodBD sí tiene datos reales
+    const idReal = prodBD.id_producto;
 
-    function renderizarCarrito() {
-        const cuerpo = document.getElementById('cuerpo-carrito');
-        if (!cuerpo) return; 
-        
-        cuerpo.innerHTML = '';
-        totalVenta = 0;
-        
-        carrito.forEach((item, index) => {
-            totalVenta += item.subtotal;
-            cuerpo.innerHTML += `
-                <tr>
-                    <td>${item.nombre}</td>
-                    <td>${item.cant}</td>
-                    <td>$${item.subtotal}</td>
-                    <td><button type="button" onclick="quitarItem(${index})">x</button></td>
-                </tr>`;
+    
+    if(cant > 0 && precioManual > 0) {
+        carrito.push({ 
+            id_producto: idReal, 
+            nombre: nombreArt, 
+            cant, 
+            precio: precioManual, 
+            subtotal: cant * precioManual 
         });
         
-        const elTotalLabel = document.getElementById('total-pre-venta');
-        if (elTotalLabel) elTotalLabel.textContent = totalVenta;
+        document.getElementById('v-artesania-nombre').value = '';
+        document.getElementById('v-cantidad').value = '1';
         
-        const elTotalInput = document.getElementById('v-total-calculado');
-        if (elTotalInput) {
-            elTotalInput.value = totalVenta;
-            elTotalInput.dispatchEvent(new Event('input')); 
-        }
+        
+        const inputPrecio = document.getElementById('v-precio-unitario');
+        inputPrecio.value = '';
+        inputPrecio.readOnly = false; 
+        
+        renderizarCarrito();
+    } else {
+        alert("Coloca una cantidad y precio válido (mayores a cero).");
     }
+};
+
+    function renderizarCarrito() {
+    const cuerpo = document.getElementById('cuerpo-carrito');
+    if (!cuerpo) return; 
+    
+    cuerpo.innerHTML = '';
+    totalVenta = 0;
+    
+    carrito.forEach((item, index) => {
+        totalVenta += item.subtotal;
+        cuerpo.innerHTML += `
+            <tr>
+                <td data-label="Artesanía">${item.nombre}</td>
+                <td data-label="Cantidad">${item.cant}</td>
+                
+                <td data-label="Subtotal">$${parseFloat(item.subtotal).toFixed(2)} MXN</td>
+                
+                <td data-label="Acción">
+                    <button type="button" onclick="quitarItem(${index})" style="background: #ff4d4d; color: white; border: none; border-radius: 3px; cursor: pointer; padding: 4px 8px; font-weight: bold;">X</button>
+                </td>
+            </tr>`;
+    });
+    
+    // Etiqueta visual para el cliente (Aquí SÍ va el signo de pesos y el MXN)
+    const elTotalLabel = document.getElementById('total-pre-venta');
+    if (elTotalLabel) {
+        elTotalLabel.textContent = `${parseFloat(totalVenta).toFixed(2)} MXN`;
+    }
+    
+    // Input oculto o de cálculo (Aquí NO va el MXN, solo el número puro para la base de datos)
+    const elTotalInput = document.getElementById('v-total-calculado');
+    if (elTotalInput) {
+        elTotalInput.value = parseFloat(totalVenta).toFixed(2);
+        elTotalInput.dispatchEvent(new Event('input')); 
+    }
+}
     
     window.quitarItem = (index) => {
         carrito.splice(index, 1);
@@ -100,11 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 4. FINALIZAR COMPRA ---
     // === 1. ESTO VA AFUERA (Para que la fecha se bloquee apenas abra la página) ===
-const hoyVenta = new Date().toISOString().split('T')[0];
+const fechaLocal = new Date();
+const hoy = fechaLocal.getFullYear() + '-' + 
+            String(fechaLocal.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(fechaLocal.getDate()).padStart(2, '0');
 const inputFechaVenta = document.getElementById('v-fecha-entrega'); 
 if (inputFechaVenta) {
-    inputFechaVenta.value = hoyVenta; // Predeterminamos el día de hoy
-    inputFechaVenta.min = hoyVenta;   // Bloqueamos días pasados en el calendario
+    inputFechaVenta.value = hoy; 
+    inputFechaVenta.min = hoy;  
 }
 
 // === 2. TU FUNCIÓN ONSUBMIT CORREGIDA Y BLINDADA ===
@@ -116,28 +147,50 @@ document.getElementById('form-venta').onsubmit = async (e) => {
     btnGuardar.disabled = true;
     btnGuardar.textContent = 'Guardando...';
 
+    // Capturamos los textos limpios
+    const nom = capitalizarTexto(document.getElementById('v-nombre').value.trim());
+    const pat = capitalizarTexto(document.getElementById('v-apellido-paterno').value.trim());
+    const mat = capitalizarTexto(document.getElementById('v-apellido-materno').value.trim());
+
+    let idClienteReal = null; 
     try {
-        // 1. Insertar Cliente 
-        const { data: nuevoCliente, error: errCliente } = await supabaseClient
+        // ==============================================================
+        // 1. CANDADO: BUSCAR SI EL CLIENTE YA EXISTE
+        // ==============================================================
+        const { data: clienteExistente, error: errBuscar } = await supabaseClient
             .from('cliente')
-            .insert([{
-                nombre: document.getElementById('v-nombre').value,
-                apellido_pat: document.getElementById('v-apellido-paterno').value,
-                apellido_mat: document.getElementById('v-apellido-materno').value
-            }])
-            .select().single();
+            .select('id_cliente')
+            .eq('nombre', nom)
+            .eq('apellido_pat', pat)
+            .eq('apellido_mat', mat)
+            .maybeSingle(); // Usa maybeSingle para que no truene si encuentra 0 registros
 
-        if (errCliente) throw errCliente;
+        if (errBuscar) throw errBuscar;
 
-        // 2. Insertar Venta
+        if (clienteExistente) {
+            // ¡Ya existía! Usamos el ID del cliente antiguo
+            idClienteReal = clienteExistente.id_cliente;
+        } else {
+            // No existe, es cliente nuevo. Lo registramos en la BD
+            const { data: nuevoCliente, error: errCliente } = await supabaseClient
+                .from('cliente')
+                .insert([{ nombre: nom, apellido_pat: pat, apellido_mat: mat }])
+                .select().single();
+
+            if (errCliente) throw errCliente;
+            idClienteReal = nuevoCliente.id_cliente;
+        }
+
+        // ===================
+        // 2. INSERTAR VENTA
+        // ===================
         const { data: nuevaVenta, error: errVenta } = await supabaseClient
             .from('venta')
             .insert([{
-                id_cliente: nuevoCliente.id_cliente,
+                id_cliente: idClienteReal, // <-- ¡MAGIA! Conectado al cliente correcto
                 total_venta: totalVenta, 
                 monto_pagado: parseFloat(document.getElementById('v-abono').value) || 0, 
-                // Usamos la variable global de hoy por si no agarra la caja de texto
-                fecha: document.getElementById('v-fecha-entrega').value || hoyVenta,
+                fecha: document.getElementById('v-fecha-entrega').value || hoy,
                 estado_pago: document.getElementById('v-estado-pago').value,
                 fecha_limite: document.getElementById('v-fecha-limite').value || null
             }])

@@ -86,6 +86,11 @@ async function prepararEdicion(id) {
 // =====================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    
+    function capitalizarTexto(texto) {
+        if (!texto) return ''; // Si está vacío, no hace nada
+        return texto.toLowerCase().replace(/\b\w/g, letra => letra.toUpperCase());
+    }
 
     function iniciarEncabezado() {
         const nombre = localStorage.getItem('nombreUsuario') || 'Desconocido';
@@ -124,10 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
         formCliente.addEventListener('submit', async (e) => {
             e.preventDefault(); 
             
-            const nombre = document.getElementById('cliente-nombre').value;
-            const apellido_pat = document.getElementById('cliente-apellido_pat').value;
-            const apellido_mat = document.getElementById('cliente-apellido_mat').value;
-            const telefono = document.getElementById('cliente-telefono').value;
+            const nombre = capitalizarTexto(document.getElementById('cliente-nombre').value);
+            const apellido_pat = capitalizarTexto(document.getElementById('cliente-apellido_pat').value);
+            const apellido_mat = capitalizarTexto(document.getElementById('cliente-apellido_mat').value);
+            const telefono = capitalizarTexto(document.getElementById('cliente-telefono').value);
 
             try {
                 if (clienteEditandoId) {

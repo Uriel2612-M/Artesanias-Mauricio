@@ -60,11 +60,11 @@ window.prepararEdicion = async (id) => {
 
         if (error) throw error;
     
-        // OJO: Usamos IDs diferentes para el modal de edición
+        
         document.getElementById('edit-proveedor-nombre').value = proveedor.nombre_proveedor;
         document.getElementById('edit-proveedor-telefono').value = proveedor.telefono || '';
         document.getElementById('edit-proveedor-calle').value = proveedor.calle || '';
-        document.getElementById('edit-proveedor-numero').value = proveedor.numero || '';
+        document.getElementById('edit-proveedor-numero').value = proveedor.numero_externo || '';
         document.getElementById('edit-proveedor-colonia').value = proveedor.colonia || '';
         document.getElementById('edit-proveedor-ciudad').value = proveedor.ciudad || '';
         document.getElementById('edit-proveedor-estado').value = proveedor.estado || '';
@@ -74,6 +74,10 @@ window.prepararEdicion = async (id) => {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    function capitalizarTexto(texto) {
+        if (!texto) return ''; // Si está vacío, no hace nada
+        return texto.toLowerCase().replace(/\b\w/g, letra => letra.toUpperCase());
+    }
     // Reloj y Encabezado
     iniciarEncabezado();
     cargarProveedores();
@@ -91,13 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formNuevo) {
         formNuevo.onsubmit = async (e) => {
             e.preventDefault();
-            const nombreVal = document.getElementById('proveedor-nombre').value;
+            const nombreVal = capitalizarTexto(document.getElementById('proveedor-nombre').value);
             const telefonoVal = document.getElementById('proveedor-telefono').value;
-            const calle = document.getElementById('proveedor-calle').value;
+            const calle = capitalizarTexto(document.getElementById('proveedor-calle').value);
             const numero = document.getElementById('proveedor-numero').value;
-            const colonia = document.getElementById('proveedor-colonia').value;
-            const ciudad = document.getElementById('proveedor-ciudad').value;
-            const estado = document.getElementById('proveedor-estado').value;
+            const colonia = capitalizarTexto(document.getElementById('proveedor-colonia').value);
+            const ciudad = capitalizarTexto(document.getElementById('proveedor-ciudad').value);
+            const estado = capitalizarTexto(document.getElementById('proveedor-estado').value);
 
             try {
                 const { error } = await supabaseClient
@@ -134,13 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formEdit) {
         formEdit.onsubmit = async (e) => {
             e.preventDefault();
-            const nombreVal = document.getElementById('edit-proveedor-nombre').value;
+            const nombreVal = capitalizarTexto(document.getElementById('edit-proveedor-nombre').value);
             const telefonoVal = document.getElementById('edit-proveedor-telefono').value;
-            const calle = document.getElementById('edit-proveedor-calle').value;
+            const calle = capitalizarTexto(document.getElementById('edit-proveedor-calle').value);
             const numero = document.getElementById('edit-proveedor-numero').value;
-            const colonia = document.getElementById('edit-proveedor-colonia').value;
-            const ciudad = document.getElementById('edit-proveedor-ciudad').value;
-            const estado = document.getElementById('edit-proveedor-estado').value;
+            const colonia = capitalizarTexto(document.getElementById('edit-proveedor-colonia').value);
+            const ciudad = capitalizarTexto(document.getElementById('edit-proveedor-ciudad').value);
+            const estado = capitalizarTexto(document.getElementById('edit-proveedor-estado').value);
 
             try {
                 const { error } = await supabaseClient

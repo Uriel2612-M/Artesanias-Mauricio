@@ -2,6 +2,10 @@ let listaMaterialesBD = [];
 let listaProveedoresBD = [];
 let compraSeleccionadaId
 document.addEventListener('DOMContentLoaded', () => {
+    function capitalizarTexto(texto) {
+        if (!texto) return ''; // Si está vacío, no hace nada
+        return texto.toLowerCase().replace(/\b\w/g, letra => letra.toUpperCase());
+    }
     // === 1. INICIALIZACIÓN Y ENCABEZADO ===
     function iniciarEncabezado() {
         const nombre = localStorage.getItem('nombreUsuario') || 'Desconocido';
@@ -141,8 +145,8 @@ window.eliminarCompra = async (idCompra) => {
     if (form) {
         form.onsubmit = async (e) => {
         e.preventDefault();
-        const textoProveedor = document.getElementById('proveedor-nombre').value;
-        const textoMaterial = document.getElementById('material-nombre').value;
+        const textoProveedor = capitalizarTexto(document.getElementById('proveedor-nombre').value);
+        const textoMaterial = capitalizarTexto(document.getElementById('material-nombre').value);
         const precioUnitario = parseFloat(document.getElementById('compra-precio-unitario').value);
         const cantidad = parseInt(document.getElementById('compra-cantidad').value);
         const total = parseFloat(document.getElementById('total-compra').value);
